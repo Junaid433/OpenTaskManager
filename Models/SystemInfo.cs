@@ -40,6 +40,14 @@ public partial class SystemInfo : ObservableObject
 
     [ObservableProperty]
     private long _hardwareReserved;
+    [ObservableProperty]
+    private int _memorySpeedMhz;
+    [ObservableProperty]
+    private int _memorySlotsUsed;
+    [ObservableProperty]
+    private int _memorySlotsTotal;
+    [ObservableProperty]
+    private string _memoryFormFactor = "Unknown";
 
     [ObservableProperty]
     private long _compressed;
@@ -128,10 +136,12 @@ public partial class SystemInfo : ObservableObject
     public string CachedMemoryFormatted => FormatBytes(CachedMemory);
     public string CommittedFormatted => FormatBytes(CommittedAs);
     public string CommitLimitFormatted => FormatBytes(CommitLimit);
-    public string SlabFormatted => FormatBytes(Slab);
-    public string PageTablesFormatted => FormatBytes(PageTables);
+    public string CommittedAndLimitGBFormatted => $"{(CommittedAs / (1024.0 * 1024.0 * 1024.0)):F1}/{(CommitLimit / (1024.0 * 1024.0 * 1024.0)):F1} GB";
+    public string SlabFormatted => FormatBytesInt(Slab);
+    public string PageTablesFormatted => FormatBytesInt(PageTables);
     public string KernelStackFormatted => FormatBytes(KernelStack);
     public string HardwareReservedFormatted => FormatBytes(HardwareReserved);
+    public string HardwareReservedMBFormatted => $"{(HardwareReserved / (1024.0 * 1024.0)):F0} MB";
     public string CompressedMemoryFormatted => FormatBytes(Compressed);
     public string DiskReadSpeedFormatted => FormatBytes(DiskReadSpeed) + "/s";
     public string DiskWriteSpeedFormatted => FormatBytes(DiskWriteSpeed) + "/s";
@@ -150,7 +160,18 @@ public partial class SystemInfo : ObservableObject
         }
         return $"{size:F1} {sizes[order]}";
     }
-
+    private static string FormatBytesInt(long bytes)
+    {
+        string[] sizes = new string[] { "B", "KB", "MB", "GB", "TB" };
+        int order = 0;
+        double size = bytes;
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+        return $"{size:F0} {sizes[order]}";
+    }
     public string L1CacheFormatted => FormatBytes(L1Cache);
     public string L2CacheFormatted => FormatBytes(L2Cache);
     public string L3CacheFormatted => FormatBytes(L3Cache);
@@ -161,6 +182,9 @@ public partial class SystemInfo : ObservableObject
 
     public string UsedMemoryGBFormatted => $"{UsedMemoryGB:F1} GB";
     public string TotalMemoryGBFormatted => $"{TotalMemoryGB:F1} GB";
+    public string MemorySpeedFormatted => MemorySpeedMhz > 0 ? $"{MemorySpeedMhz} MHz" : "Unknown";
+    public string MemorySlotsFormatted => MemorySlotsTotal > 0 ? $"{MemorySlotsUsed} of {MemorySlotsTotal}" : "Unknown";
+    public string MemoryFormFactorFormatted => string.IsNullOrWhiteSpace(MemoryFormFactor) ? "Unknown" : MemoryFormFactor;
 
     partial void OnTotalMemoryChanged(long value)
     {
@@ -187,11 +211,13 @@ public partial class SystemInfo : ObservableObject
     partial void OnCommittedAsChanged(long value)
     {
         OnPropertyChanged(nameof(CommittedFormatted));
+        OnPropertyChanged(nameof(CommittedAndLimitGBFormatted));
     }
 
     partial void OnCommitLimitChanged(long value)
     {
         OnPropertyChanged(nameof(CommitLimitFormatted));
+        OnPropertyChanged(nameof(CommittedAndLimitGBFormatted));
     }
 
     partial void OnSlabChanged(long value)
@@ -212,6 +238,27 @@ public partial class SystemInfo : ObservableObject
     partial void OnHardwareReservedChanged(long value)
     {
         OnPropertyChanged(nameof(HardwareReservedFormatted));
+        OnPropertyChanged(nameof(HardwareReservedMBFormatted));
+    }
+
+    partial void OnMemorySpeedMhzChanged(int value)
+    {
+        OnPropertyChanged(nameof(MemorySpeedFormatted));
+    }
+
+    partial void OnMemorySlotsUsedChanged(int value)
+    {
+        OnPropertyChanged(nameof(MemorySlotsFormatted));
+    }
+
+    partial void OnMemorySlotsTotalChanged(int value)
+    {
+        OnPropertyChanged(nameof(MemorySlotsFormatted));
+    }
+
+    partial void OnMemoryFormFactorChanged(string value)
+    {
+        OnPropertyChanged(nameof(MemoryFormFactorFormatted));
     }
 
     partial void OnCompressedChanged(long value)

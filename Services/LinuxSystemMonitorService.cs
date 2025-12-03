@@ -185,7 +185,7 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                 catch { info.Compressed = 0; }
                 try
                 {
-                    info.HardwareReserved = GetValue("HardwareReserved");
+                    info.HardwareReserved = GetValue("HardwareReserved") + GetValue("HardwareCorrupted");
                 }
                 catch { info.HardwareReserved = 0; }
                 info.CommittedAs = GetValue("Committed_AS");
@@ -193,6 +193,83 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                 info.Slab = GetValue("Slab");
                 info.PageTables = GetValue("PageTables");
                 info.KernelStack = GetValue("KernelStack");
+                // Attempt to read DIMM info (slots, speed, form factor) via dmidecode
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "dmidecode",
+                        Arguments = "-t memory",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    using var proc = Process.Start(psi);
+                    if (proc != null)
+                    {
+                        var outStr = proc.StandardOutput.ReadToEnd();
+                        proc.WaitForExit(2000);
+                        var lines = outStr.Split('\n');
+                        int totalSlots = 0;
+                        int usedSlots = 0;
+                        int maxSpeed = 0;
+                        string? formFactor = null;
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            var line = lines[i].Trim();
+                            if (line.StartsWith("Memory Device", StringComparison.OrdinalIgnoreCase))
+                            {
+                                totalSlots++;
+                                // Gather block lines until blank
+                                var j = i + 1;
+                                var block = new List<string>();
+                                while (j < lines.Length && !string.IsNullOrWhiteSpace(lines[j]))
+                                {
+                                    block.Add(lines[j].Trim());
+                                    j++;
+                                }
+                                i = j;
+                                foreach (var b in block)
+                                {
+                                    if (b.StartsWith("Size:", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        var val = b.Substring("Size:".Length).Trim();
+                                        if (!val.StartsWith("No Module Installed", StringComparison.OrdinalIgnoreCase) && !val.StartsWith("Unknown", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            usedSlots++;
+                                        }
+                                    }
+                                    else if (b.StartsWith("Speed:", StringComparison.OrdinalIgnoreCase) ||
+                                              b.StartsWith("Configured Clock Speed:", StringComparison.OrdinalIgnoreCase) ||
+                                              b.StartsWith("Configured Memory Speed:", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        var val = b.Split(':').Last().Trim();
+                                        if (val.EndsWith("MHz", StringComparison.OrdinalIgnoreCase) ||
+                                            val.EndsWith("MT/s", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            var unit = val.EndsWith("MHz", StringComparison.OrdinalIgnoreCase) ? "MHz" : "MT/s";
+                                            var numStr = val.Substring(0, val.Length - unit.Length).Trim();
+                                            if (int.TryParse(numStr, out var mhz)) maxSpeed = Math.Max(maxSpeed, mhz);
+                                        }
+                                    }
+                                    else if (b.StartsWith("Form Factor:", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        var val = b.Substring("Form Factor:".Length).Trim();
+                                        if (!string.IsNullOrEmpty(val) && !val.Equals("Unknown", StringComparison.OrdinalIgnoreCase) && formFactor == null)
+                                            formFactor = val;
+                                    }
+                                }
+                            }
+                        }
+
+                        info.MemorySlotsTotal = totalSlots;
+                        info.MemorySlotsUsed = usedSlots;
+                        info.MemorySpeedMhz = maxSpeed;
+                        info.MemoryFormFactor = formFactor ?? "Unknown";
+                    }
+                }
+                catch { /* ignore, dmidecode may not be available */ }
             }
             catch { }
 
