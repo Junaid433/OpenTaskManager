@@ -226,7 +226,7 @@
                                             <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
                                                 <TextBlock Text="CPU" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="{Binding SystemInfo.CpuUsage, StringFormat={}{0:F0}%}" Foreground="#60CDFF" FontSize="13" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding SystemInfo.CpuUsage, StringFormat={}{0:F0}%}" Foreground="#9E9E9E" FontSize="13"/>
                                                     <TextBlock Text="{Binding SystemInfo.CpuSpeed, StringFormat={}{0:F2} GHz}" Foreground="#9E9E9E" FontSize="13"/>
                                                 </StackPanel>
                                             </StackPanel>
@@ -241,11 +241,14 @@
                                             <controls:PerformanceGraph Width="72" Height="40" Values="{Binding MemoryHistory}" LineBrush="#9B59B6" FillBrush="#339B59B6" ShowGrid="False"/>
                                             <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
                                                 <TextBlock Text="Memory" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <TextBlock Text="{Binding SystemInfo.MemoryUsage, StringFormat={}{0:F0}%}" Foreground="#9B59B6" FontSize="13" FontWeight="SemiBold"/>
+                                                <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="{Binding SystemInfo.UsedMemoryGB, StringFormat={}{0:F1}}" Foreground="#9E9E9E" FontSize="13"/>
                                                     <TextBlock Text="/" Foreground="#9E9E9E" FontSize="13"/>
                                                     <TextBlock Text="{Binding SystemInfo.TotalMemoryGB, StringFormat={}{0:F1} GB}" Foreground="#9E9E9E" FontSize="13"/>
+                                                    <TextBlock Text=" " Foreground="#9E9E9E" FontSize="13"/>
+                                                    <TextBlock Text="(" Foreground="#9E9E9E" FontSize="13"/>
+                                                    <TextBlock Text="{Binding SystemInfo.MemoryUsage, StringFormat={}{0:F0}%}" Foreground="#9E9E9E" FontSize="13"/>
+                                                    <TextBlock Text=")" Foreground="#9E9E9E" FontSize="13"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Grid>
