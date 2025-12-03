@@ -297,8 +297,8 @@
                                                                 <TextBlock Text="{Binding Name}" Foreground="#9E9E9E" FontSize="12"/>
                                                             </StackPanel>
                                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                                <TextBlock Text="{Binding SidebarSendFormatted}" Foreground="#E74C3C" FontSize="11"/>
-                                                                <TextBlock Text="{Binding SidebarReceiveFormatted}" Foreground="#3498DB" FontSize="11"/>
+                                                                <TextBlock Text="{Binding SidebarSendFormatted}" Foreground="#9E9E9E" FontSize="11"/>
+                                                                <TextBlock Text="{Binding SidebarReceiveFormatted}" Foreground="#9E9E9E" FontSize="11"/>
                                                             </StackPanel>
                                                         </StackPanel>
                                                     </Grid>
