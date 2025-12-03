@@ -69,6 +69,9 @@ public partial class DiskInfo : ObservableObject
     public string SystemDiskFormatted => IsSystemDisk ? "Yes" : "No";
     public string PageFileFormatted => IsPageFile ? "Yes" : "No";
 
+    public string TotalBytesReadFormatted => FormatBytes(TotalBytesRead);
+    public string TotalBytesWrittenFormatted => FormatBytes(TotalBytesWritten);
+
     private static string FormatBytes(long bytes)
     {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -102,4 +105,6 @@ public partial class DiskInfo : ObservableObject
     partial void OnAverageResponseTimeMsChanged(double value) => OnPropertyChanged(nameof(ResponseTimeFormatted));
     partial void OnIsSystemDiskChanged(bool value) => OnPropertyChanged(nameof(SystemDiskFormatted));
     partial void OnIsPageFileChanged(bool value) => OnPropertyChanged(nameof(PageFileFormatted));
+    partial void OnTotalBytesReadChanged(long value) => OnPropertyChanged(nameof(TotalBytesReadFormatted));
+    partial void OnTotalBytesWrittenChanged(long value) => OnPropertyChanged(nameof(TotalBytesWrittenFormatted));
 }

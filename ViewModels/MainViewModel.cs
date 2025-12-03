@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OpenTaskManager.Models;
@@ -314,8 +315,29 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private async Task RunNewTask()
     {
-        // This would open a dialog to run a new process
-        await Task.CompletedTask;
+        try
+        {
+            var app = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime;
+            if (app?.MainWindow is Window mainWindow)
+            {
+                var dialog = new OpenTaskManager.Views.RunTaskDialog();
+                var result = await dialog.ShowDialog<bool?>(mainWindow);
+                
+                if (result == true && !string.IsNullOrWhiteSpace(dialog.CommandText))
+                {
+                    string command = dialog.CommandText;
+                    if (dialog.RunAsSudo)
+                    {
+                        command = $"sudo {command}";
+                    }
+                    System.Diagnostics.Process.Start("bash", new[] { "-c", command });
+                }
+            }
+        }
+        catch
+        {
+            // Ignore if dialog fails
+        }
     }
 
     [RelayCommand]
@@ -366,5 +388,159 @@ public partial class MainViewModel : ObservableObject
     {
         SelectedNetworkInterface = networkInterface;
         SelectedPerformanceTab = 3; // Switch to Network tab
+    }
+
+    [RelayCommand]
+    private async Task OpenResourceMonitor()
+    {
+        string sudoUser = Environment.GetEnvironmentVariable("SUDO_USER") ?? Environment.UserName;
+        try
+        {
+            if (sudoUser != "root")
+            {
+                System.Diagnostics.Process.Start("su", new[] { sudoUser, "-c", "xterm -e top" });
+            }
+            else
+            {
+                // Fallback
+                System.Diagnostics.Process.Start("xterm", new[] { "-e", "top" });
+            }
+        }
+        catch
+        {
+            // Show error dialog
+            try
+            {
+                System.Diagnostics.Process.Start("zenity", new[] { "--error", "--text=xterm is not installed. Please install it with 'sudo pacman -S xterm' or equivalent for your distro." });
+            }
+            catch
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start("notify-send", new[] { "Resource Monitor", "xterm is not installed. Please install it with 'sudo pacman -S xterm' or equivalent for your distro." });
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+        }
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task Copy()
+    {
+        string text = "";
+        switch (SelectedPerformanceTab)
+        {
+            case 0: // CPU
+                text = $@"CPU
+
+{SystemInfo.CpuName}
+
+Base speed:	{SystemInfo.CpuBaseSpeed:F2} GHz
+Sockets:	{SystemInfo.Sockets}
+Cores:	{SystemInfo.Cores}
+Logical processors:	{SystemInfo.LogicalProcessors}
+Virtualization:	{(SystemInfo.Virtualization ? "Enabled" : "Disabled")}
+L1 cache:	{SystemInfo.L1CacheFormatted}
+L2 cache:	{SystemInfo.L2CacheFormatted}
+L3 cache:	{SystemInfo.L3CacheFormatted}
+
+Utilization	{SystemInfo.CpuUsage:F0}%
+Speed	{SystemInfo.CpuSpeed:F2} GHz
+Up time	{SystemInfo.UptimeFormatted}
+Processes	{SystemInfo.ProcessCount}
+Threads	{SystemInfo.ThreadCount}
+Handles	{SystemInfo.HandleCount}
+";
+                break;
+            case 1: // Memory
+                text = $@"Memory
+
+{SystemInfo.UsedMemoryGBFormatted} / {SystemInfo.TotalMemoryGBFormatted} ({SystemInfo.MemoryUsage:F0}%)
+
+In use:	{SystemInfo.UsedMemoryFormatted}
+Available:	{SystemInfo.AvailableMemoryFormatted}
+Committed:	{SystemInfo.CommittedFormatted} / {SystemInfo.CommitLimitFormatted}
+Cached:	{SystemInfo.CachedMemoryFormatted}
+Paged pool:	{SystemInfo.SlabFormatted}
+Non-paged pool:	{SystemInfo.PageTablesFormatted}
+Speed:	{SystemInfo.MemorySpeedFormatted}
+Slots used:	{SystemInfo.MemorySlotsFormatted}
+Form factor:	{SystemInfo.MemoryFormFactorFormatted}
+";
+                break;
+            case 2: // Disk
+                if (SelectedDisk != null)
+                {
+                    text = $@"Disk
+
+{SelectedDisk.DisplayName}
+
+Read speed:	{SelectedDisk.ReadSpeedFormatted}/s
+Write speed:	{SelectedDisk.WriteSpeedFormatted}/s
+Active time:	{SelectedDisk.ActiveTimePercent:F1}%
+Response time:	{SelectedDisk.AverageResponseTimeMs:F1} ms
+Total read:	{SelectedDisk.TotalBytesReadFormatted}
+Total written:	{SelectedDisk.TotalBytesWrittenFormatted}
+Capacity:	{SelectedDisk.CapacityFormatted}
+Used space:	{SelectedDisk.UsedSpaceFormatted}
+Free space:	{SelectedDisk.FreeSpaceFormatted}
+Type:	{SelectedDisk.Type}
+";
+                }
+                break;
+            case 3: // Network
+                if (SelectedNetworkInterface != null)
+                {
+                    text = $@"Network
+
+{SelectedNetworkInterface.DisplayName}
+
+Send speed:	{SelectedNetworkInterface.SendSpeedFormatted}/s
+Receive speed:	{SelectedNetworkInterface.ReceiveSpeedFormatted}/s
+Total sent:	{SelectedNetworkInterface.TotalSentFormatted}
+Total received:	{SelectedNetworkInterface.TotalReceivedFormatted}
+Link speed:	{SelectedNetworkInterface.LinkSpeedFormatted}
+IPv4 address:	{SelectedNetworkInterface.Ipv4Address}
+IPv6 address:	{SelectedNetworkInterface.Ipv6Address}
+DNS name:	{SelectedNetworkInterface.DnsName}
+MAC address:	{SelectedNetworkInterface.MacAddress}
+";
+                }
+                break;
+            case 4: // GPU
+                text = $@"GPU
+
+{SystemInfo.GpuName}
+
+Utilization:	{SystemInfo.GpuUsage:F0}%
+Dedicated GPU memory:	{SystemInfo.GpuDedicatedMemoryFormatted}
+Shared GPU memory:	{SystemInfo.GpuSharedMemoryFormatted}
+GPU memory:	{SystemInfo.GpuMemoryUsedFormatted} / {SystemInfo.GpuMemoryTotalFormatted}
+Temperature:	{SystemInfo.GpuTemperatureFormatted}
+Power:	{SystemInfo.GpuPowerFormatted}
+Fan speed:	{SystemInfo.GpuFanSpeedFormatted}
+Core clock:	{SystemInfo.GpuCoreClockFormatted}
+Memory clock:	{SystemInfo.GpuMemoryClockFormatted}
+Driver version:	{SystemInfo.GpuDriverVersion}
+";
+                break;
+        }
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            var app = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.ClassicDesktopStyleApplicationLifetime;
+            if (app?.MainWindow is Avalonia.Controls.Window window)
+            {
+                var topLevel = Avalonia.Controls.TopLevel.GetTopLevel(window);
+                if (topLevel != null && topLevel.Clipboard != null)
+                {
+                    await topLevel.Clipboard.SetTextAsync(text);
+                }
+            }
+        }
     }
 }

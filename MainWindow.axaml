@@ -209,7 +209,56 @@
                     </Grid>
 
                     <!-- Tab 1: Performance -->
-                    <Grid ColumnDefinitions="240,*">
+                    <Grid RowDefinitions="Auto,*">
+                        <!-- Performance Toolbar -->
+                        <Border Grid.Row="0" Background="#1F1F1F" Padding="16,10" BorderBrush="#2D2D2D" BorderThickness="0,0,0,1">
+                            <Grid ColumnDefinitions="240,*,Auto">
+                                <TextBlock Grid.Column="0" Text="Performance" FontSize="18" FontWeight="SemiBold" 
+                                           Foreground="#FFFFFF" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                
+                                <!-- Center space -->
+                                <Border Grid.Column="1"/>
+                                
+                                <!-- Action Buttons -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <!-- Run new task button -->
+                                    <Button Classes="actionButton" Command="{Binding RunNewTaskCommand}" Padding="8,6" Margin="0">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <PathIcon Width="14" Height="14" Foreground="#FFFFFF"
+                                                      Data="M20 14H14V20H10V14H4V10H10V4H14V10H20V14Z"/>
+                                            <TextBlock Text="Run new task" Foreground="#FFFFFF"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- Divider -->
+                                    <Border Background="#404040" Width="1" Height="20" Opacity="0.5"/>
+
+                                    <!-- More options button (three dots) -->
+                                    <Button Classes="actionButton" Padding="8,4">
+                                        <Button.Flyout>
+                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                <MenuItem Header="Copy" Command="{Binding CopyCommand}">
+                                                    <MenuItem.Icon>
+                                                        <PathIcon Data="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" Width="16" Height="16" Foreground="#FFFFFF"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                                <Separator />
+                                                <MenuItem Header="Resource Monitor" Command="{Binding OpenResourceMonitorCommand}">
+                                                    <MenuItem.Icon>
+                                                        <PathIcon Data="M21,16V6H3V16H21M21,4A2,2 0 0,1 23,6V16A2,2 0 0,1 21,18H14V20H16V22H8V20H10V18H3A2,2 0 0,1 1,16V6A2,2 0 0,1 3,4H21M5,8H7V12H5V8M9,8H11V12H9V8M13,8H15V12H13V8Z" Width="16" Height="16" Foreground="#FFFFFF"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                        <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                                  Data="M12,8A2,2 0 0,1 14,10A2,2 0 0,1 12,12A2,2 0 0,1 10,10A2,2 0 0,1 12,8M19,8A2,2 0 0,1 21,10A2,2 0 0,1 19,12A2,2 0 0,1 17,10A2,2 0 0,1 19,8M5,8A2,2 0 0,1 7,10A2,2 0 0,1 5,12A2,2 0 0,1 3,10A2,2 0 0,1 5,8Z"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Performance Content -->
+                        <Grid Grid.Row="1" ColumnDefinitions="240,*">
                         <!-- Performance Navigation Sidebar -->
                         <Border Grid.Column="0" Background="#1F1F1F" BorderBrush="#404040" BorderThickness="0,0,1,0">
                             <ScrollViewer>
@@ -345,6 +394,7 @@
                             <!-- GPU Details -->
                             <views:GpuPerformanceView
                                   IsVisible="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=4}"/>
+                        </Grid>
                         </Grid>
                     </Grid>
 
