@@ -1095,8 +1095,50 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                                     iface.Ipv6Address = addr.Address.ToString();
                             }
 
-                            // DNS suffix
-                            iface.DnsName = ipProps.DnsSuffix;
+                            // DNS servers - more useful than domain suffix
+                            if (ipProps.DnsAddresses.Count > 0)
+                            {
+                                iface.DnsName = string.Join(", ", ipProps.DnsAddresses.Take(2).Select(addr => addr.ToString()));
+                            }
+                            else
+                            {
+                                // Fallback: try to get domain from /etc/resolv.conf
+                                try
+                                {
+                                    if (File.Exists("/etc/resolv.conf"))
+                                    {
+                                        var resolvConf = File.ReadAllLines("/etc/resolv.conf");
+                                        var domainLine = resolvConf.FirstOrDefault(line =>
+                                            line.StartsWith("domain ", StringComparison.OrdinalIgnoreCase) ||
+                                            line.StartsWith("search ", StringComparison.OrdinalIgnoreCase));
+
+                                        if (!string.IsNullOrEmpty(domainLine))
+                                        {
+                                            var domainParts = domainLine.Split([' '], 2);
+                                            if (domainParts.Length > 1)
+                                            {
+                                                iface.DnsName = domainParts[1].Trim();
+                                            }
+                                        }
+
+                                        // If no domain, try to get DNS servers
+                                        if (string.IsNullOrEmpty(iface.DnsName))
+                                        {
+                                            var nameserverLines = resolvConf.Where(line =>
+                                                line.StartsWith("nameserver ", StringComparison.OrdinalIgnoreCase)).ToList();
+                                            if (nameserverLines.Count > 0)
+                                            {
+                                                var servers = nameserverLines.Select(line => line.Split([' '], 2))
+                                                                           .Where(parts => parts.Length > 1)
+                                                                           .Select(parts => parts[1].Trim())
+                                                                           .Take(2);
+                                                iface.DnsName = string.Join(", ", servers);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch { }
+                            }
                         }
                     }
                     catch { }
