@@ -269,11 +269,8 @@
                                                                                     ShowGrid="False"/>
                                                         <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
                                                             <TextBlock Text="{Binding DisplayName}" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
-                                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                                <TextBlock Text="{Binding Type}" Foreground="#9E9E9E" FontSize="12"/>
-                                                                <TextBlock Text="·" Foreground="#9E9E9E" FontSize="12"/>
-                                                                <TextBlock Text="{Binding ActiveTimeFormatted}" Foreground="#9E9E9E" FontSize="12"/>
-                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Type}" Foreground="#9E9E9E" FontSize="12"/>
+                                                            <TextBlock Text="{Binding ActiveTimeFormatted}" Foreground="#9E9E9E" FontSize="12"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </Button>
