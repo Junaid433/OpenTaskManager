@@ -227,7 +227,6 @@
                                                 <TextBlock Text="CPU" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                     <TextBlock Text="{Binding SystemInfo.CpuUsage, StringFormat={}{0:F0}%}" Foreground="#60CDFF" FontSize="13" FontWeight="SemiBold"/>
-                                                    <TextBlock Text="·" Foreground="#9E9E9E" FontSize="13"/>
                                                     <TextBlock Text="{Binding SystemInfo.CpuSpeed, StringFormat={}{0:F2} GHz}" Foreground="#9E9E9E" FontSize="13"/>
                                                 </StackPanel>
                                             </StackPanel>
