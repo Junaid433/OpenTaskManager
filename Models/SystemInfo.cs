@@ -74,6 +74,60 @@ public partial class SystemInfo : ObservableObject
     private double _gpuUsage;
 
     [ObservableProperty]
+    private string _gpuName = "Unknown GPU";
+
+    [ObservableProperty]
+    private long _gpuMemoryTotal;
+
+    [ObservableProperty]
+    private long _gpuMemoryUsed;
+
+    [ObservableProperty]
+    private long _gpuMemoryFree;
+
+    [ObservableProperty]
+    private long _gpuMemorySharedTotal;
+
+    [ObservableProperty]
+    private long _gpuMemorySharedUsed;
+
+    [ObservableProperty]
+    private double _gpuTemperature;
+
+    [ObservableProperty]
+    private string _gpuDriverVersion = "Unknown";
+
+    [ObservableProperty]
+    private double _gpuVideoEncodeUsage;
+
+    [ObservableProperty]
+    private double _gpuVideoDecodeUsage;
+
+    [ObservableProperty]
+    private double _gpu3DUsage;
+
+    [ObservableProperty]
+    private double _gpuCopyUsage;
+
+    [ObservableProperty]
+    private int _gpuPowerUsage;
+
+    [ObservableProperty]
+    private int _gpuPowerLimit;
+
+    [ObservableProperty]
+    private int _gpuFanSpeed;
+
+    [ObservableProperty]
+    private int _gpuCoreClock;
+
+    [ObservableProperty]
+    private int _gpuMemoryClock;
+
+    [ObservableProperty]
+    private bool _gpuAvailable;
+
+    [ObservableProperty]
     private string _cpuName = "Unknown CPU";
 
     [ObservableProperty]
@@ -147,6 +201,88 @@ public partial class SystemInfo : ObservableObject
     public string DiskWriteSpeedFormatted => FormatBytes(DiskWriteSpeed) + "/s";
     public string NetworkSendSpeedFormatted => FormatBytes(NetworkSendSpeed) + "/s";
     public string NetworkReceiveSpeedFormatted => FormatBytes(NetworkReceiveSpeed) + "/s";
+
+    // GPU Formatted Properties
+    public double GpuMemoryTotalGB => GpuMemoryTotal / (1024.0 * 1024.0 * 1024.0);
+    public double GpuMemoryUsedGB => GpuMemoryUsed / (1024.0 * 1024.0 * 1024.0);
+    public double GpuMemoryFreeGB => GpuMemoryFree / (1024.0 * 1024.0 * 1024.0);
+    public double GpuMemorySharedTotalGB => GpuMemorySharedTotal / (1024.0 * 1024.0 * 1024.0);
+    public double GpuMemorySharedUsedGB => GpuMemorySharedUsed / (1024.0 * 1024.0 * 1024.0);
+    public string GpuMemoryTotalFormatted => FormatBytes(GpuMemoryTotal);
+    public string GpuMemoryUsedFormatted => FormatBytes(GpuMemoryUsed);
+    public string GpuMemoryFreeFormatted => FormatBytes(GpuMemoryFree);
+    public string GpuDedicatedMemoryFormatted => GpuMemoryTotal > 0 ? $"{GpuMemoryUsedGB:F1}/{GpuMemoryTotalGB:F1} GB" : "N/A";
+    public string GpuSharedMemoryFormatted => GpuMemorySharedTotal > 0 ? $"{GpuMemorySharedUsedGB:F1}/{GpuMemorySharedTotalGB:F1} GB" : "N/A";
+    public string GpuTemperatureFormatted => GpuAvailable ? $"{GpuTemperature:F0} °C" : "N/A";
+    public string GpuPowerFormatted => GpuPowerLimit > 0 ? $"{GpuPowerUsage} W / {GpuPowerLimit} W" : "N/A";
+    public string GpuFanSpeedFormatted => GpuFanSpeed >= 0 ? $"{GpuFanSpeed}%" : "N/A";
+    public string GpuCoreClockFormatted => GpuCoreClock > 0 ? $"{GpuCoreClock} MHz" : "N/A";
+    public string GpuMemoryClockFormatted => GpuMemoryClock > 0 ? $"{GpuMemoryClock} MHz" : "N/A";
+    public double GpuMemoryUsagePercent => GpuMemoryTotal > 0 ? 100.0 * GpuMemoryUsed / GpuMemoryTotal : 0;
+
+    partial void OnGpuMemoryTotalChanged(long value)
+    {
+        OnPropertyChanged(nameof(GpuMemoryTotalGB));
+        OnPropertyChanged(nameof(GpuMemoryTotalFormatted));
+        OnPropertyChanged(nameof(GpuDedicatedMemoryFormatted));
+        OnPropertyChanged(nameof(GpuMemoryUsagePercent));
+    }
+
+    partial void OnGpuMemoryUsedChanged(long value)
+    {
+        OnPropertyChanged(nameof(GpuMemoryUsedGB));
+        OnPropertyChanged(nameof(GpuMemoryUsedFormatted));
+        OnPropertyChanged(nameof(GpuDedicatedMemoryFormatted));
+        OnPropertyChanged(nameof(GpuMemoryUsagePercent));
+    }
+
+    partial void OnGpuMemoryFreeChanged(long value)
+    {
+        OnPropertyChanged(nameof(GpuMemoryFreeGB));
+        OnPropertyChanged(nameof(GpuMemoryFreeFormatted));
+    }
+
+    partial void OnGpuMemorySharedTotalChanged(long value)
+    {
+        OnPropertyChanged(nameof(GpuMemorySharedTotalGB));
+        OnPropertyChanged(nameof(GpuSharedMemoryFormatted));
+    }
+
+    partial void OnGpuMemorySharedUsedChanged(long value)
+    {
+        OnPropertyChanged(nameof(GpuMemorySharedUsedGB));
+        OnPropertyChanged(nameof(GpuSharedMemoryFormatted));
+    }
+
+    partial void OnGpuTemperatureChanged(double value)
+    {
+        OnPropertyChanged(nameof(GpuTemperatureFormatted));
+    }
+
+    partial void OnGpuPowerUsageChanged(int value)
+    {
+        OnPropertyChanged(nameof(GpuPowerFormatted));
+    }
+
+    partial void OnGpuPowerLimitChanged(int value)
+    {
+        OnPropertyChanged(nameof(GpuPowerFormatted));
+    }
+
+    partial void OnGpuFanSpeedChanged(int value)
+    {
+        OnPropertyChanged(nameof(GpuFanSpeedFormatted));
+    }
+
+    partial void OnGpuCoreClockChanged(int value)
+    {
+        OnPropertyChanged(nameof(GpuCoreClockFormatted));
+    }
+
+    partial void OnGpuMemoryClockChanged(int value)
+    {
+        OnPropertyChanged(nameof(GpuMemoryClockFormatted));
+    }
 
     private static string FormatBytes(long bytes)
     {

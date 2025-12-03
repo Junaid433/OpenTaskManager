@@ -50,6 +50,18 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<double> _networkHistory = [];
 
+    [ObservableProperty]
+    private ObservableCollection<double> _gpuHistory = [];
+
+    [ObservableProperty]
+    private ObservableCollection<double> _gpuMemoryHistory = [];
+
+    [ObservableProperty]
+    private ObservableCollection<double> _gpuVideoEncodeHistory = [];
+
+    [ObservableProperty]
+    private ObservableCollection<double> _gpuVideoDecodeHistory = [];
+
     // Disk and Network collections
     [ObservableProperty]
     private ObservableCollection<DiskInfo> _disks = [];
@@ -86,6 +98,10 @@ public partial class MainViewModel : ObservableObject
             MemoryHistory.Add(0);
             DiskHistory.Add(0);
             NetworkHistory.Add(0);
+            GpuHistory.Add(0);
+            GpuMemoryHistory.Add(0);
+            GpuVideoEncodeHistory.Add(0);
+            GpuVideoDecodeHistory.Add(0);
         }
     }
 
@@ -110,6 +126,12 @@ public partial class MainViewModel : ObservableObject
             AddToHistory(MemoryHistory, info.MemoryUsage);
             AddToHistory(DiskHistory, Math.Min(100, info.DiskUsage));
             AddToHistory(NetworkHistory, Math.Min(100, (info.NetworkSendSpeed + info.NetworkReceiveSpeed) / 10_000_000.0));
+            
+            // Update GPU histories
+            AddToHistory(GpuHistory, info.GpuUsage);
+            AddToHistory(GpuMemoryHistory, info.GpuMemoryUsagePercent);
+            AddToHistory(GpuVideoEncodeHistory, info.GpuVideoEncodeUsage);
+            AddToHistory(GpuVideoDecodeHistory, info.GpuVideoDecodeUsage);
         });
     }
 

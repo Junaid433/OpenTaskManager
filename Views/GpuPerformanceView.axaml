@@ -3,56 +3,181 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:OpenTaskManager.ViewModels"
+             xmlns:controls="using:OpenTaskManager.Controls"
              mc:Ignorable="d"
              x:Class="OpenTaskManager.Views.GpuPerformanceView"
              x:DataType="vm:MainViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        <Border Grid.Row="0" Background="#1F1F1F" Padding="24,16">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel>
-                    <TextBlock Text="GPU" FontSize="28" FontWeight="Light" Foreground="#FFFFFF"/>
-                    <TextBlock Text="Graphics" FontSize="14" Foreground="#9E9E9E" Margin="0,4,0,0"/>
+    <Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+        <!-- Header: GPU title and name -->
+        <Border Grid.Row="0" Background="#1F1F1F" Padding="18,12" BorderBrush="#2D2D2D" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                <StackPanel Grid.Row="0">
+                    <TextBlock Text="GPU" FontSize="24" FontWeight="SemiBold" Foreground="#FFFFFF"/>
                 </StackPanel>
-                <TextBlock Grid.Column="1" Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F1}%}"
-                           FontSize="28" FontWeight="Light" Foreground="#F39C12" VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="6">
+                    <TextBlock Text="{Binding SystemInfo.GpuName}" FontSize="13" Foreground="#A0A0A0"/>
+                </StackPanel>
+
+                <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                    <TextBlock Grid.Column="0" Text="3D" FontSize="13" Foreground="#888888" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="100%" FontSize="13" Foreground="#888888" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                </Grid>
             </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="#1A1A1A" Padding="24">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <PathIcon Width="64" Height="64" Foreground="#5A5A5A"
-                          Data="M8,2L10,2L10,4L8,4L8,2M12,2L14,2L14,4L12,4L12,2M16,2L18,2L18,4L16,4L16,2M8,6L10,6L10,8L8,8L8,6M12,6L14,6L14,8L12,8L12,6M16,6L18,6L18,8L16,8L16,6M8,10L10,10L10,12L8,12L8,10M12,10L14,10L14,12L12,12L12,10M16,10L18,10L18,12L16,12L16,10M2,8L4,8L4,10L2,10L2,8M2,12L4,12L4,14L2,14L2,12M2,16L4,16L4,18L2,18L2,16M6,8L8,8L8,10L6,10L6,8M6,12L8,12L8,14L6,14L6,12M6,16L8,16L8,18L6,18L6,16M10,14L12,14L12,16L10,16L10,14M14,14L16,14L16,16L14,16L14,14M10,18L12,18L12,20L10,20L10,18M14,18L16,18L16,20L14,20L14,18M18,8L20,8L20,10L18,10L18,8M18,12L20,12L20,14L18,14L18,12M18,16L20,16L20,18L18,18L18,16Z"/>
-                <TextBlock Text="No GPU detected" FontSize="18" Foreground="#9E9E9E"
-                           Margin="0,16,0,8" HorizontalAlignment="Center"/>
-                <TextBlock Text="GPU monitoring is not available on this system"
-                           Foreground="#5A5A5A" HorizontalAlignment="Center"/>
+        <!-- Main GPU utilization graph -->
+        <Border Grid.Row="1" Background="#1A1A1A" Padding="0" Margin="0">
+            <Grid>
+                <controls:PerformanceGraph Values="{Binding GpuHistory}" MaxValue="100"
+                                            LineBrush="#60CDFF" FillBrush="#1A60CDFF" ShowGrid="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </Grid>
+        </Border>
+
+        <!-- Time labels below the main graph -->
+        <Grid Grid.Row="2" Margin="12,6,12,6" ColumnDefinitions="*,Auto">
+            <TextBlock Text="60 seconds" Foreground="#888888" FontSize="10" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Text="0" Foreground="#888888" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+        </Grid>
+
+        <!-- Secondary graphs: Video Encode and Video Decode -->
+        <Border Grid.Row="3" Background="#1F1F1F" Padding="12,8" BorderBrush="#2D2D2D" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,16,*">
+                <!-- Video Encode Graph -->
+                <StackPanel Grid.Column="0">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                        <TextBlock Text="Video Encode" FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding SystemInfo.GpuVideoEncodeUsage, StringFormat={}{0:F0}%}" FontSize="11" Foreground="#A0A0A0" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Border Background="#1A1A1A" Height="60" CornerRadius="2">
+                        <controls:PerformanceGraph Values="{Binding GpuVideoEncodeHistory}" MaxValue="100"
+                                                    LineBrush="#9B59B6" FillBrush="#339B59B6" ShowGrid="False"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- Video Decode Graph -->
+                <StackPanel Grid.Column="2">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                        <TextBlock Text="Video Decode" FontSize="11" Foreground="#888888" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding SystemInfo.GpuVideoDecodeUsage, StringFormat={}{0:F0}%}" FontSize="11" Foreground="#A0A0A0" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Border Background="#1A1A1A" Height="60" CornerRadius="2">
+                        <controls:PerformanceGraph Values="{Binding GpuVideoDecodeHistory}" MaxValue="100"
+                                                    LineBrush="#3498DB" FillBrush="#333498DB" ShowGrid="False"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- GPU Memory Usage Bar: Dedicated -->
+        <Border Grid.Row="4" Background="#1F1F1F" Padding="12,8">
+            <StackPanel>
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                    <TextBlock Text="Dedicated GPU memory usage" FontSize="11" Foreground="#888888"/>
+                    <TextBlock Grid.Column="1" Text="{Binding SystemInfo.GpuMemoryTotalFormatted}" FontSize="11" Foreground="#888888"/>
+                </Grid>
+                <Border Background="#333333" Height="24" CornerRadius="2">
+                    <Grid>
+                        <Border Background="#9B59B6" HorizontalAlignment="Left" CornerRadius="2">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource PercentToWidthConverter}">
+                                    <Binding Path="SystemInfo.GpuMemoryUsagePercent"/>
+                                    <Binding Path="$parent[Border].Bounds.Width"/>
+                                </MultiBinding>
+                            </Border.Width>
+                        </Border>
+                    </Grid>
+                </Border>
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="2" Background="#1F1F1F" Padding="24">
-            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="32">
-                <StackPanel>
-                    <TextBlock Text="Utilization" Foreground="#9E9E9E" FontSize="11"/>
-                    <TextBlock Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F1}%}"
-                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
-                </StackPanel>
-                <StackPanel Grid.Column="1">
-                    <TextBlock Text="Dedicated GPU memory" Foreground="#9E9E9E" FontSize="11"/>
-                    <TextBlock Text="0 MB"
-                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
-                </StackPanel>
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Shared GPU memory" Foreground="#9E9E9E" FontSize="11"/>
-                    <TextBlock Text="0 MB"
-                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
-                </StackPanel>
-                <StackPanel Grid.Column="3">
-                    <TextBlock Text="GPU engine" Foreground="#9E9E9E" FontSize="11"/>
-                    <TextBlock Text="Unknown"
-                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
-                </StackPanel>
+        <!-- GPU Memory Usage Bar: Shared -->
+        <Border Grid.Row="5" Background="#1F1F1F" Padding="12,8">
+            <StackPanel>
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                    <TextBlock Text="Shared GPU memory usage" FontSize="11" Foreground="#888888"/>
+                    <TextBlock Grid.Column="1" Text="{Binding SystemInfo.GpuMemorySharedTotalGB, StringFormat={}{0:F1} GB}" FontSize="11" Foreground="#888888"/>
+                </Grid>
+                <Border Background="#333333" Height="24" CornerRadius="2">
+                    <Grid>
+                        <!-- Shared memory usage bar - typically minimal for dedicated GPUs -->
+                        <Border Background="#7F8C8D" HorizontalAlignment="Left" Width="0" CornerRadius="2"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Stats Section -->
+        <Border Grid.Row="6" Background="#1F1F1F" Padding="16,12">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
+                <!-- Left stats -->
+                <Grid Grid.Column="0">
+                    <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto">
+                        <!-- Row 0: Utilization / Dedicated GPU memory / (empty) -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
+                            <TextBlock Text="Utilization" Foreground="#888888" FontSize="11"/>
+                            <TextBlock Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F0}%}" Foreground="#FFFFFF" FontSize="22" FontWeight="Normal" LineHeight="24"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,8,6">
+                            <TextBlock Text="Dedicated GPU memory" Foreground="#888888" FontSize="11"/>
+                            <TextBlock Text="{Binding SystemInfo.GpuDedicatedMemoryFormatted}" Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" LineHeight="20"/>
+                        </StackPanel>
+                        <Border Grid.Row="0" Grid.Column="2" Margin="8,0,0,6"/>
+
+                        <!-- Row 1: GPU Memory / Shared GPU memory / (empty) -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,6">
+                            <TextBlock Text="GPU Memory" Foreground="#888888" FontSize="11"/>
+                            <TextBlock Text="{Binding SystemInfo.GpuMemoryUsagePercent, StringFormat={}{0:F0}%}" Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" LineHeight="20"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,8,6">
+                            <TextBlock Text="Shared GPU memory" Foreground="#888888" FontSize="11"/>
+                            <TextBlock Text="{Binding SystemInfo.GpuSharedMemoryFormatted}" Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" LineHeight="20"/>
+                        </StackPanel>
+                        <Border Grid.Row="1" Grid.Column="2" Margin="8,0,0,6"/>
+
+                        <!-- Row 2: GPU Temperature -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,0">
+                            <TextBlock Text="GPU Temperature" Foreground="#888888" FontSize="11"/>
+                            <TextBlock Text="{Binding SystemInfo.GpuTemperatureFormatted}" Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" LineHeight="20"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- Right stats -->
+                <Grid Grid.Column="1" Margin="16,0,0,0">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Driver version:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SystemInfo.GpuDriverVersion}" Foreground="#FFFFFF" FontSize="14"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Power usage:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SystemInfo.GpuPowerFormatted}" Foreground="#FFFFFF" FontSize="14"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Fan speed:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SystemInfo.GpuFanSpeedFormatted}" Foreground="#FFFFFF" FontSize="14"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Core clock:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SystemInfo.GpuCoreClockFormatted}" Foreground="#FFFFFF" FontSize="14"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Memory clock:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SystemInfo.GpuMemoryClockFormatted}" Foreground="#FFFFFF" FontSize="14"/>
+                    </Grid>
+                </Grid>
             </Grid>
+        </Border>
+
+        <!-- Spacer row -->
+        <Border Grid.Row="7" Height="12" Background="#1F1F1F"/>
+
+        <!-- No GPU fallback - shown when GPU is not available -->
+        <Border Grid.Row="8" Background="#1F1F1F" Padding="24" IsVisible="{Binding !SystemInfo.GpuAvailable}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <PathIcon Width="48" Height="48" Foreground="#5A5A5A"
+                          Data="M8,2L10,2L10,4L8,4L8,2M12,2L14,2L14,4L12,4L12,2M16,2L18,2L18,4L16,4L16,2M8,6L10,6L10,8L8,8L8,6M12,6L14,6L14,8L12,8L12,6M16,6L18,6L18,8L16,8L16,6M8,10L10,10L10,12L8,12L8,10M12,10L14,10L14,12L12,12L12,10M16,10L18,10L18,12L16,12L16,10"/>
+                <TextBlock Text="GPU monitoring requires nvidia-smi" FontSize="14" Foreground="#9E9E9E"
+                           Margin="0,12,0,4" HorizontalAlignment="Center"/>
+                <TextBlock Text="Install NVIDIA drivers to enable GPU monitoring"
+                           Foreground="#5A5A5A" FontSize="12" HorizontalAlignment="Center"/>
+            </StackPanel>
         </Border>
     </Grid>
 </UserControl>

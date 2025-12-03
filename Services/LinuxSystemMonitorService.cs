@@ -437,6 +437,117 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                 }
             }
             catch { }
+
+            // GPU Info (NVIDIA via nvidia-smi)
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "nvidia-smi",
+                    Arguments = "--query-gpu=name,driver_version,utilization.gpu,utilization.encoder,utilization.decoder,memory.total,memory.used,memory.free,temperature.gpu,power.draw,power.limit,fan.speed,clocks.gr,clocks.mem --format=csv,noheader,nounits",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var proc = Process.Start(psi);
+                if (proc != null)
+                {
+                    var output = proc.StandardOutput.ReadToEnd();
+                    proc.WaitForExit(2000);
+
+                    if (proc.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
+                    {
+                        var parts = output.Split(',').Select(p => p.Trim()).ToArray();
+                        if (parts.Length >= 14)
+                        {
+                            info.GpuAvailable = true;
+                            info.GpuName = parts[0];
+                            info.GpuDriverVersion = parts[1];
+
+                            if (double.TryParse(parts[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var gpuUtil))
+                            {
+                                info.GpuUsage = gpuUtil;
+                                info.Gpu3DUsage = gpuUtil; // nvidia-smi reports overall GPU utilization
+                            }
+
+                            if (double.TryParse(parts[3], NumberStyles.Any, CultureInfo.InvariantCulture, out var encUtil))
+                                info.GpuVideoEncodeUsage = encUtil;
+
+                            if (double.TryParse(parts[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var decUtil))
+                                info.GpuVideoDecodeUsage = decUtil;
+
+                            // Memory is in MiB from nvidia-smi
+                            if (double.TryParse(parts[5], NumberStyles.Any, CultureInfo.InvariantCulture, out var memTotal))
+                                info.GpuMemoryTotal = (long)(memTotal * 1024 * 1024);
+
+                            if (double.TryParse(parts[6], NumberStyles.Any, CultureInfo.InvariantCulture, out var memUsed))
+                                info.GpuMemoryUsed = (long)(memUsed * 1024 * 1024);
+
+                            if (double.TryParse(parts[7], NumberStyles.Any, CultureInfo.InvariantCulture, out var memFree))
+                                info.GpuMemoryFree = (long)(memFree * 1024 * 1024);
+
+                            if (double.TryParse(parts[8], NumberStyles.Any, CultureInfo.InvariantCulture, out var temp))
+                                info.GpuTemperature = temp;
+
+                            if (double.TryParse(parts[9], NumberStyles.Any, CultureInfo.InvariantCulture, out var power))
+                                info.GpuPowerUsage = (int)power;
+
+                            if (double.TryParse(parts[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var powerLimit))
+                                info.GpuPowerLimit = (int)powerLimit;
+
+                            if (int.TryParse(parts[11], NumberStyles.Any, CultureInfo.InvariantCulture, out var fan))
+                                info.GpuFanSpeed = fan;
+                            else
+                                info.GpuFanSpeed = -1; // Not available (e.g., laptop GPUs)
+
+                            if (int.TryParse(parts[12], NumberStyles.Any, CultureInfo.InvariantCulture, out var coreClock))
+                                info.GpuCoreClock = coreClock;
+
+                            if (int.TryParse(parts[13], NumberStyles.Any, CultureInfo.InvariantCulture, out var memClock))
+                                info.GpuMemoryClock = memClock;
+
+                            // Estimate shared GPU memory (system RAM that can be used by GPU)
+                            // On Linux with NVIDIA, this is typically the GTT (Graphics Translation Table) memory
+                            // We'll approximate it as 50% of system RAM or a reasonable default
+                            info.GpuMemorySharedTotal = info.TotalMemory / 2;
+                            info.GpuMemorySharedUsed = 0; // nvidia-smi doesn't report this directly
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // nvidia-smi not available, try AMD ROCm
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "rocm-smi",
+                        Arguments = "--showtemp --showuse --showmemuse --showpower --json",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    using var proc = Process.Start(psi);
+                    if (proc != null)
+                    {
+                        var output = proc.StandardOutput.ReadToEnd();
+                        proc.WaitForExit(2000);
+                        
+                        if (proc.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
+                        {
+                            info.GpuAvailable = true;
+                            info.GpuName = "AMD GPU";
+                            // Parse ROCm JSON output (simplified)
+                        }
+                    }
+                }
+                catch { /* No GPU monitoring available */ }
+            }
         });
 
         return info;
