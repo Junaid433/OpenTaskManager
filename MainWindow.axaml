@@ -10,7 +10,7 @@
         x:Class="OpenTaskManager.MainWindow"
         x:DataType="vm:MainViewModel"
         x:Name="ThisWindow"
-        Title="Task Manager"
+        Title="OpenTaskManager"
         Width="1200" Height="750"
         MinWidth="800" MinHeight="500"
         Background="#202020"
