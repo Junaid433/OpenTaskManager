@@ -315,7 +315,8 @@
                                             <controls:PerformanceGraph Width="72" Height="40" Values="{Binding CpuHistory}" LineBrush="#F39C12" FillBrush="#33F39C12" ShowGrid="False"/>
                                             <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
                                                 <TextBlock Text="GPU 0" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
-                                                <TextBlock Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F0}%}" Foreground="#9E9E9E" FontSize="13"/>
+                                                <TextBlock Text="{Binding SystemInfo.GpuName}" Foreground="#9E9E9E" FontSize="13"/>
+                                                <TextBlock Text="{Binding SystemInfo.GpuUsageWithTempFormatted}" Foreground="#9E9E9E" FontSize="13"/>
                                             </StackPanel>
                                         </Grid>
                                     </Button>

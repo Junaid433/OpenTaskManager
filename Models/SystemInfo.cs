@@ -219,6 +219,7 @@ public partial class SystemInfo : ObservableObject
     public string GpuCoreClockFormatted => GpuCoreClock > 0 ? $"{GpuCoreClock} MHz" : "N/A";
     public string GpuMemoryClockFormatted => GpuMemoryClock > 0 ? $"{GpuMemoryClock} MHz" : "N/A";
     public double GpuMemoryUsagePercent => GpuMemoryTotal > 0 ? 100.0 * GpuMemoryUsed / GpuMemoryTotal : 0;
+    public string GpuUsageWithTempFormatted => GpuAvailable ? $"{GpuUsage:F0}% ({GpuTemperature:F0}°C)" : "N/A";
 
     partial void OnGpuMemoryTotalChanged(long value)
     {
@@ -257,6 +258,7 @@ public partial class SystemInfo : ObservableObject
     partial void OnGpuTemperatureChanged(double value)
     {
         OnPropertyChanged(nameof(GpuTemperatureFormatted));
+        OnPropertyChanged(nameof(GpuUsageWithTempFormatted));
     }
 
     partial void OnGpuPowerUsageChanged(int value)
@@ -282,6 +284,11 @@ public partial class SystemInfo : ObservableObject
     partial void OnGpuMemoryClockChanged(int value)
     {
         OnPropertyChanged(nameof(GpuMemoryClockFormatted));
+    }
+
+    partial void OnGpuUsageChanged(double value)
+    {
+        OnPropertyChanged(nameof(GpuUsageWithTempFormatted));
     }
 
     private static string FormatBytes(long bytes)
