@@ -214,7 +214,7 @@ public partial class SystemInfo : ObservableObject
     public string GpuDedicatedMemoryFormatted => GpuMemoryTotal > 0 ? $"{GpuMemoryUsedGB:F1}/{GpuMemoryTotalGB:F1} GB" : "N/A";
     public string GpuSharedMemoryFormatted => GpuMemorySharedTotal > 0 ? $"{GpuMemorySharedUsedGB:F1}/{GpuMemorySharedTotalGB:F1} GB" : "N/A";
     public string GpuTemperatureFormatted => GpuAvailable ? $"{GpuTemperature:F0} °C" : "N/A";
-    public string GpuPowerFormatted => GpuPowerLimit > 0 ? $"{GpuPowerUsage} W / {GpuPowerLimit} W" : "N/A";
+    public string GpuPowerFormatted => GpuPowerLimit > 0 ? $"{GpuPowerUsage}W/{GpuPowerLimit}W" : "N/A";
     public string GpuFanSpeedFormatted => GpuFanSpeed >= 0 ? $"{GpuFanSpeed}%" : "N/A";
     public string GpuCoreClockFormatted => GpuCoreClock > 0 ? $"{GpuCoreClock} MHz" : "N/A";
     public string GpuMemoryClockFormatted => GpuMemoryClock > 0 ? $"{GpuMemoryClock} MHz" : "N/A";
