@@ -1,0 +1,158 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:OpenTaskManager.Converters"
+             x:Class="OpenTaskManager.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+        <converters:LongGreaterThanZeroConverter x:Key="LongGreaterThanZeroConverter"/>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        
+        <!-- Windows 11 Task Manager Dark Theme -->
+        <Style Selector="Window">
+            <Setter Property="Background" Value="#202020"/>
+        </Style>
+
+        <!-- Sidebar Button Style -->
+        <Style Selector="Button.sidebarButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.sidebarButton:pointerover">
+            <Setter Property="Background" Value="#3D3D3D"/>
+        </Style>
+        <Style Selector="Button.sidebarButton:pressed">
+            <Setter Property="Background" Value="#4D4D4D"/>
+        </Style>
+        <Style Selector="Button.sidebarButton.selected">
+            <Setter Property="Background" Value="#0078D4"/>
+        </Style>
+
+        <!-- Action Button Style -->
+        <Style Selector="Button.actionButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.actionButton:pointerover">
+            <Setter Property="Background" Value="#3D3D3D"/>
+        </Style>
+        <Style Selector="Button.actionButton:disabled">
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+
+        <!-- DataGrid Styles -->
+        <Style Selector="DataGrid">
+            <Setter Property="Background" Value="#202020"/>
+            <Setter Property="RowBackground" Value="#202020"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="#9E9E9E"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="MinHeight" Value="32"/>
+        </Style>
+        <Style Selector="DataGridRow">
+            <Setter Property="Focusable" Value="True"/>
+        </Style>
+        <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="Fill" Value="#0078D4"/>
+            <Setter Property="Opacity" Value="0.6"/>
+        </Style>
+        <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+            <Setter Property="Fill" Value="#3D3D3D"/>
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+
+        <!-- ScrollBar Styles -->
+        <Style Selector="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ScrollBar /template/ Thumb">
+            <Setter Property="Background" Value="#5A5A5A"/>
+            <Setter Property="CornerRadius" Value="4"/>
+        </Style>
+
+        <!-- TextBox Search Style -->
+        <Style Selector="TextBox.searchBox">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="32,8,8,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBox.searchBox:focus">
+            <Setter Property="BorderBrush" Value="#60CDFF"/>
+        </Style>
+
+        <!-- Performance Card Style -->
+        <Style Selector="Border.performanceCard">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+        <Style Selector="Border.performanceCard:pointerover">
+            <Setter Property="Background" Value="#353535"/>
+        </Style>
+
+        <!-- Sidebar Item Icon -->
+        <Style Selector="PathIcon.sidebarIcon">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+
+        <!-- Tab Headers for Performance -->
+        <Style Selector="Button.perfNavButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="#0078D4"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="MinHeight" Value="64"/>
+            <Setter Property="MinWidth" Value="220"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Margin" Value="8,6"/>
+        </Style>
+        <Style Selector="Button.perfNavButton:pointerover">
+            <Setter Property="Background" Value="#2D2D2D"/>
+        </Style>
+        <Style Selector="Button.perfNavButton:selected">
+            <Setter Property="Background" Value="#222428"/>
+            <Setter Property="BorderThickness" Value="4,0,0,0"/>
+            <Setter Property="BorderBrush" Value="#60CDFF"/>
+        </Style>
+
+        <!-- Performance Detail Styles -->
+        <Style Selector="Grid.perfDetail">
+            <Setter Property="Background" Value="#1A1A1A"/>
+        </Style>
+
+    </Application.Styles>
+</Application>

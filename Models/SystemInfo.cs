@@ -1,0 +1,234 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
+
+namespace OpenTaskManager.Models;
+
+public partial class SystemInfo : ObservableObject
+{
+    [ObservableProperty]
+    private double _cpuUsage;
+
+    [ObservableProperty]
+    private double _memoryUsage;
+
+    [ObservableProperty]
+    private long _totalMemory;
+
+    [ObservableProperty]
+    private long _usedMemory;
+
+    [ObservableProperty]
+    private long _availableMemory;
+
+    [ObservableProperty]
+    private long _cachedMemory;
+
+    [ObservableProperty]
+    private long _committedAs;
+
+    [ObservableProperty]
+    private long _commitLimit;
+
+    [ObservableProperty]
+    private long _slab;
+
+    [ObservableProperty]
+    private long _pageTables;
+
+    [ObservableProperty]
+    private long _kernelStack;
+
+    [ObservableProperty]
+    private long _hardwareReserved;
+
+    [ObservableProperty]
+    private long _compressed;
+
+    [ObservableProperty]
+    private double _diskUsage;
+
+    [ObservableProperty]
+    private long _diskReadSpeed;
+
+    [ObservableProperty]
+    private long _diskWriteSpeed;
+
+    [ObservableProperty]
+    private double _networkUsage;
+
+    [ObservableProperty]
+    private long _networkSendSpeed;
+
+    [ObservableProperty]
+    private long _networkReceiveSpeed;
+
+    [ObservableProperty]
+    private double _gpuUsage;
+
+    [ObservableProperty]
+    private string _cpuName = "Unknown CPU";
+
+    [ObservableProperty]
+    private int _cpuCores;
+
+    [ObservableProperty]
+    private int _cpuThreads;
+
+    [ObservableProperty]
+    private double _cpuSpeed;
+
+    [ObservableProperty]
+    private double _cpuBaseSpeed;
+
+    [ObservableProperty]
+    private int _sockets;
+
+    [ObservableProperty]
+    private int _cores;
+
+    [ObservableProperty]
+    private int _logicalProcessors;
+
+    [ObservableProperty]
+    private bool _virtualization;
+
+    [ObservableProperty]
+    private long _l1Cache;
+
+    [ObservableProperty]
+    private long _l2Cache;
+
+    [ObservableProperty]
+    private long _l3Cache;
+
+    [ObservableProperty]
+    private int _processCount;
+
+    [ObservableProperty]
+    private int _threadCount;
+
+    [ObservableProperty]
+    private int _handleCount;
+
+    [ObservableProperty]
+    private long _uptime;
+
+    public string UptimeFormatted
+    {
+        get
+        {
+            var ts = System.TimeSpan.FromSeconds(Uptime);
+            return $"{(int)ts.TotalDays}:{ts.Hours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";
+        }
+    }
+
+    public string TotalMemoryFormatted => FormatBytes(TotalMemory);
+    public string UsedMemoryFormatted => FormatBytes(UsedMemory);
+    public string AvailableMemoryFormatted => FormatBytes(AvailableMemory);
+    public string CachedMemoryFormatted => FormatBytes(CachedMemory);
+    public string CommittedFormatted => FormatBytes(CommittedAs);
+    public string CommitLimitFormatted => FormatBytes(CommitLimit);
+    public string SlabFormatted => FormatBytes(Slab);
+    public string PageTablesFormatted => FormatBytes(PageTables);
+    public string KernelStackFormatted => FormatBytes(KernelStack);
+    public string HardwareReservedFormatted => FormatBytes(HardwareReserved);
+    public string CompressedMemoryFormatted => FormatBytes(Compressed);
+    public string DiskReadSpeedFormatted => FormatBytes(DiskReadSpeed) + "/s";
+    public string DiskWriteSpeedFormatted => FormatBytes(DiskWriteSpeed) + "/s";
+    public string NetworkSendSpeedFormatted => FormatBytes(NetworkSendSpeed) + "/s";
+    public string NetworkReceiveSpeedFormatted => FormatBytes(NetworkReceiveSpeed) + "/s";
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] sizes = new string[] { "B", "KB", "MB", "GB", "TB" };
+        int order = 0;
+        double size = bytes;
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size /= 1024;
+        }
+        return $"{size:F1} {sizes[order]}";
+    }
+
+    public string L1CacheFormatted => FormatBytes(L1Cache);
+    public string L2CacheFormatted => FormatBytes(L2Cache);
+    public string L3CacheFormatted => FormatBytes(L3Cache);
+
+    public double UsedMemoryGB => TotalMemory == 0 ? 0 : UsedMemory / (1024.0 * 1024.0 * 1024.0);
+    public double TotalMemoryGB => TotalMemory == 0 ? 0 : TotalMemory / (1024.0 * 1024.0 * 1024.0);
+    public string MemorySummaryFormatted => TotalMemory == 0 ? $"{UsedMemoryFormatted} / {TotalMemoryFormatted} ({MemoryUsage:F0}%)" : $"{UsedMemoryGB:F1}/{TotalMemoryGB:F1} GB ({MemoryUsage:F0}%)";
+
+    public string UsedMemoryGBFormatted => $"{UsedMemoryGB:F1} GB";
+    public string TotalMemoryGBFormatted => $"{TotalMemoryGB:F1} GB";
+
+    partial void OnTotalMemoryChanged(long value)
+    {
+        OnPropertyChanged(nameof(MemorySummaryFormatted));
+        OnPropertyChanged(nameof(TotalMemoryGBFormatted));
+    }
+
+    partial void OnUsedMemoryChanged(long value)
+    {
+        OnPropertyChanged(nameof(MemorySummaryFormatted));
+        OnPropertyChanged(nameof(UsedMemoryGBFormatted));
+    }
+
+    partial void OnMemoryUsageChanged(double value)
+    {
+        OnPropertyChanged(nameof(MemorySummaryFormatted));
+    }
+
+    partial void OnCachedMemoryChanged(long value)
+    {
+        OnPropertyChanged(nameof(CachedMemoryFormatted));
+    }
+
+    partial void OnCommittedAsChanged(long value)
+    {
+        OnPropertyChanged(nameof(CommittedFormatted));
+    }
+
+    partial void OnCommitLimitChanged(long value)
+    {
+        OnPropertyChanged(nameof(CommitLimitFormatted));
+    }
+
+    partial void OnSlabChanged(long value)
+    {
+        OnPropertyChanged(nameof(SlabFormatted));
+    }
+
+    partial void OnPageTablesChanged(long value)
+    {
+        OnPropertyChanged(nameof(PageTablesFormatted));
+    }
+
+    partial void OnKernelStackChanged(long value)
+    {
+        OnPropertyChanged(nameof(KernelStackFormatted));
+    }
+
+    partial void OnHardwareReservedChanged(long value)
+    {
+        OnPropertyChanged(nameof(HardwareReservedFormatted));
+    }
+
+    partial void OnCompressedChanged(long value)
+    {
+        OnPropertyChanged(nameof(CompressedMemoryFormatted));
+    }
+}
+
+public class CpuCoreInfo
+{
+    public int CoreId { get; set; }
+    public double Usage { get; set; }
+    public double Frequency { get; set; }
+}
+
+public class PerformanceDataPoint
+{
+    public double Value { get; set; }
+    public System.DateTime Timestamp { get; set; }
+}

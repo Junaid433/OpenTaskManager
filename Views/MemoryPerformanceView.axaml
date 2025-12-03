@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OpenTaskManager.ViewModels"
+             xmlns:controls="using:OpenTaskManager.Controls"
+             mc:Ignorable="d"
+             x:Class="OpenTaskManager.Views.MemoryPerformanceView"
+             x:DataType="vm:MainViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto,Auto">
+        <!-- Header: Memory title and total -->
+        <Border Grid.Row="0" Background="#1F1F1F" Padding="18,12">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                <TextBlock Grid.Row="0" Text="Memory" FontSize="28" FontWeight="Light" Foreground="#FFFFFF"/>
+                <TextBlock Grid.Row="1" Text="Memory usage" FontSize="12" Foreground="#9E9E9E" VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right">
+                    <TextBlock Text="{Binding SystemInfo.TotalMemoryGBFormatted}" FontSize="16" FontWeight="Normal" Foreground="#FFFFFF"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SystemInfo.TotalMemoryGBFormatted}" FontSize="11" Foreground="#9E9E9E" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Graph with 60 seconds / 0 labels -->
+        <Border Grid.Row="1" Background="#1A1A1A" Padding="0" Margin="0">
+            <Grid RowDefinitions="*,Auto">
+                <controls:PerformanceGraph Values="{Binding MemoryHistory}" MaxValue="100"
+                                            LineBrush="#9B59B6" FillBrush="#339B59B6" ShowGrid="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="12,6,12,12">
+                    <TextBlock Text="60 seconds" FontSize="11" Foreground="#9E9E9E"/>
+                    <TextBlock Grid.Column="1" Text="0" FontSize="11" Foreground="#9E9E9E"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Memory composition bar -->
+        <Border Grid.Row="2" Background="#1A1A1A" Padding="0">
+            <StackPanel Margin="12,8,12,16">
+                <TextBlock Text="Memory composition" Foreground="#9E9E9E" FontSize="12"/>
+                <Border BorderBrush="#333333" BorderThickness="1" Margin="0,8,0,0" HorizontalAlignment="Stretch">
+                    <controls:MemoryComposition TotalBytes="{Binding SystemInfo.TotalMemory}" 
+                                                 UsedBytes="{Binding SystemInfo.UsedMemory}" 
+                                                 CompressedBytes="{Binding SystemInfo.Compressed}" 
+                                                 HardwareReservedBytes="{Binding SystemInfo.HardwareReserved}" 
+                                                 Height="36" HorizontalAlignment="Stretch"/>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Three Column System: Column 1 (In use, Committed, Paged pool), Column 2 (Available, Cached, Non-paged pool), Column 3 (Hardware reserved) -->
+        <Border Grid.Row="3" Background="#1F1F1F" Padding="16,8,16,8">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="48">
+                <!-- Column 1 -->
+                <StackPanel Grid.Column="0">
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="In use (Compressed)" Foreground="#FFFFFF" FontSize="11"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" Text="{Binding SystemInfo.UsedMemoryFormatted}" />
+                            <TextBlock Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" Margin="6,0,0,0" IsVisible="{Binding SystemInfo.Compressed, Converter={StaticResource LongGreaterThanZeroConverter}}">
+                                <Run Text=" ("/>
+                                <Run Text="{Binding SystemInfo.CompressedMemoryFormatted}"/>
+                                <Run Text=")"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="Committed" Foreground="#9E9E9E" FontSize="11"/>
+                        <TextBlock Foreground="#FFFFFF" FontSize="18" FontWeight="Normal">
+                            <Run Text="{Binding SystemInfo.CommittedFormatted}"/>
+                            <Run Text="/"/>
+                            <Run Text="{Binding SystemInfo.CommitLimitFormatted}"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Paged pool" Foreground="#9E9E9E" FontSize="11"/>
+                        <TextBlock Text="{Binding SystemInfo.SlabFormatted}"
+                                   Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Column 2 -->
+                <StackPanel Grid.Column="1">
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="Available" Foreground="#9E9E9E" FontSize="11"/>
+                        <TextBlock Text="{Binding SystemInfo.AvailableMemoryFormatted}"
+                                   Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,0,16">
+                        <TextBlock Text="Cached" Foreground="#9E9E9E" FontSize="11"/>
+                        <TextBlock Text="{Binding SystemInfo.CachedMemoryFormatted}"
+                                   Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Non-paged pool" Foreground="#9E9E9E" FontSize="11"/>
+                        <TextBlock Text="{Binding SystemInfo.PageTablesFormatted}"
+                                   Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Column 3 -->
+                <StackPanel Grid.Column="2" VerticalAlignment="Top">
+                    <TextBlock Text="Hardware reserved" Foreground="#9E9E9E" FontSize="11"/>
+                    <TextBlock Text="{Binding SystemInfo.HardwareReservedFormatted}"
+                               Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Empty row for spacing -->
+        <Border Grid.Row="4" Background="#1F1F1F" Padding="16,8,16,24"/>
+
+    </Grid>
+</UserControl>

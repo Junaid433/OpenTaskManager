@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:OpenTaskManager.ViewModels"
+             mc:Ignorable="d"
+             x:Class="OpenTaskManager.Views.GpuPerformanceView"
+             x:DataType="vm:MainViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Grid.Row="0" Background="#1F1F1F" Padding="24,16">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="GPU" FontSize="28" FontWeight="Light" Foreground="#FFFFFF"/>
+                    <TextBlock Text="Graphics" FontSize="14" Foreground="#9E9E9E" Margin="0,4,0,0"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F1}%}"
+                           FontSize="28" FontWeight="Light" Foreground="#F39C12" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="#1A1A1A" Padding="24">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <PathIcon Width="64" Height="64" Foreground="#5A5A5A"
+                          Data="M8,2L10,2L10,4L8,4L8,2M12,2L14,2L14,4L12,4L12,2M16,2L18,2L18,4L16,4L16,2M8,6L10,6L10,8L8,8L8,6M12,6L14,6L14,8L12,8L12,6M16,6L18,6L18,8L16,8L16,6M8,10L10,10L10,12L8,12L8,10M12,10L14,10L14,12L12,12L12,10M16,10L18,10L18,12L16,12L16,10M2,8L4,8L4,10L2,10L2,8M2,12L4,12L4,14L2,14L2,12M2,16L4,16L4,18L2,18L2,16M6,8L8,8L8,10L6,10L6,8M6,12L8,12L8,14L6,14L6,12M6,16L8,16L8,18L6,18L6,16M10,14L12,14L12,16L10,16L10,14M14,14L16,14L16,16L14,16L14,14M10,18L12,18L12,20L10,20L10,18M14,18L16,18L16,20L14,20L14,18M18,8L20,8L20,10L18,10L18,8M18,12L20,12L20,14L18,14L18,12M18,16L20,16L20,18L18,18L18,16Z"/>
+                <TextBlock Text="No GPU detected" FontSize="18" Foreground="#9E9E9E"
+                           Margin="0,16,0,8" HorizontalAlignment="Center"/>
+                <TextBlock Text="GPU monitoring is not available on this system"
+                           Foreground="#5A5A5A" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Background="#1F1F1F" Padding="24">
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="32">
+                <StackPanel>
+                    <TextBlock Text="Utilization" Foreground="#9E9E9E" FontSize="11"/>
+                    <TextBlock Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F1}%}"
+                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Dedicated GPU memory" Foreground="#9E9E9E" FontSize="11"/>
+                    <TextBlock Text="0 MB"
+                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Shared GPU memory" Foreground="#9E9E9E" FontSize="11"/>
+                    <TextBlock Text="0 MB"
+                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3">
+                    <TextBlock Text="GPU engine" Foreground="#9E9E9E" FontSize="11"/>
+                    <TextBlock Text="Unknown"
+                               Foreground="#FFFFFF" FontSize="18" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

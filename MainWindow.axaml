@@ -1,0 +1,448 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:OpenTaskManager.ViewModels"
+        xmlns:controls="using:OpenTaskManager.Controls"
+        xmlns:views="using:OpenTaskManager.Views"
+        xmlns:converters="using:OpenTaskManager.Converters"
+        mc:Ignorable="d"
+        x:Class="OpenTaskManager.MainWindow"
+        x:DataType="vm:MainViewModel"
+        x:Name="ThisWindow"
+        Title="Task Manager"
+        Width="1200" Height="750"
+        MinWidth="800" MinHeight="500"
+        Background="#202020"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+    <Window.Resources>
+        <converters:BoolToWidthConverter x:Key="BoolToWidthConverter"/>
+        <converters:IntEqualsConverter x:Key="IntEqualsConverter"/>
+        <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+    </Window.Resources>
+
+    <Grid>
+        <!-- Main Content -->
+        <Grid ColumnDefinitions="Auto,*">
+            <!-- Sidebar -->
+            <Border Grid.Column="0" Background="#2D2D2D" 
+                    Width="{Binding IsSidebarExpanded, Converter={StaticResource BoolToWidthConverter}}">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <!-- Hamburger Menu Button -->
+                    <Button Grid.Row="0" Classes="sidebarButton" Command="{Binding ToggleSidebarCommand}"
+                            Margin="4,8,4,4" Padding="12,8" HorizontalAlignment="Left">
+                        <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                  Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"/>
+                    </Button>
+
+                    <!-- Navigation Items -->
+                    <StackPanel Grid.Row="1" Margin="4,4">
+                        <!-- Processes -->
+                        <Button Classes="sidebarButton" 
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=0}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="Processes">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M4,2H20A2,2 0 0,1 22,4V20A2,2 0 0,1 20,22H4A2,2 0 0,1 2,20V4A2,2 0 0,1 4,2M4,4V8H8V4H4M10,4V8H14V4H10M16,4V8H20V4H16M4,10V14H8V10H4M10,10V14H14V10H10M16,10V14H20V10H16M4,16V20H8V16H4M10,16V20H14V16H10M16,16V20H20V16H16Z"/>
+                                <TextBlock Text="Processes" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Performance -->
+                        <Button Classes="sidebarButton"
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=1}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="Performance">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"/>
+                                <TextBlock Text="Performance" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- App history -->
+                        <Button Classes="sidebarButton"
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=2}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="AppHistory">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
+                                <TextBlock Text="App history" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Startup apps -->
+                        <Button Classes="sidebarButton"
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=3}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="StartupApps">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z"/>
+                                <TextBlock Text="Startup apps" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Users -->
+                        <Button Classes="sidebarButton"
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=4}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="Users">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"/>
+                                <TextBlock Text="Users" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Details -->
+                        <Button Classes="sidebarButton"
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=5}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="Details">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
+                                <TextBlock Text="Details" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Services -->
+                        <Button Classes="sidebarButton"
+                                Classes.selected="{Binding SelectedTabIndex, Converter={StaticResource IntEqualsConverter}, ConverterParameter=6}"
+                                Command="{Binding SelectTabCommand}" CommandParameter="Services">
+                            <StackPanel Orientation="Horizontal">
+                                <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                          Data="M12,3C7.58,3 4,4.79 4,7V17C4,19.21 7.59,21 12,21C16.41,21 20,19.21 20,17V7C20,4.79 16.42,3 12,3M12,5C15.87,5 18,6.5 18,7C18,7.5 15.87,9 12,9C8.13,9 6,7.5 6,7C6,6.5 8.13,5 12,5M18,17C18,17.5 15.87,19 12,19C8.13,19 6,17.5 6,17V14.77C7.61,15.55 9.72,16 12,16C14.28,16 16.39,15.55 18,14.77V17M18,12C18,12.5 15.87,14 12,14C8.13,14 6,12.5 6,12V9.77C7.61,10.55 9.72,11 12,11C14.28,11 16.39,10.55 18,9.77V12Z"/>
+                                <TextBlock Text="Services" Margin="12,0,0,0" FontSize="13"
+                                           IsVisible="{Binding IsSidebarExpanded}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Settings at Bottom -->
+                    <Button Grid.Row="2" Classes="sidebarButton" Margin="4,4,4,8">
+                        <StackPanel Orientation="Horizontal">
+                            <PathIcon Width="16" Height="16" Foreground="#FFFFFF"
+                                      Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+                            <TextBlock Text="Settings" Margin="12,0,0,0" FontSize="13" 
+                                       IsVisible="{Binding IsSidebarExpanded}"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Main Content Area -->
+            <Grid Grid.Column="1">
+                <!-- Tab Content using Carousel -->
+                <Carousel SelectedIndex="{Binding SelectedTabIndex}">
+                    <!-- Tab 0: Processes -->
+                    <Grid RowDefinitions="Auto,*">
+                        <!-- Toolbar -->
+                        <Border Grid.Row="0" Background="#2D2D2D" Padding="16,8">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <TextBlock Grid.Column="0" Text="Processes" FontSize="18" FontWeight="SemiBold" 
+                                           Foreground="#FFFFFF" VerticalAlignment="Center"/>
+                                
+                                <!-- Search Box -->
+                                <Border Grid.Column="1" Background="#383838" CornerRadius="4" 
+                                        Margin="24,0" MaxWidth="300" HorizontalAlignment="Center">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <PathIcon Grid.Column="0" Width="14" Height="14" Margin="10,0,6,0"
+                                                  Foreground="#9E9E9E"
+                                                  Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+                                        <TextBox Grid.Column="1" Text="{Binding SearchText}" 
+                                                 Watermark="Search processes" BorderThickness="0"
+                                                 Background="Transparent" Foreground="#FFFFFF" 
+                                                 Padding="4,8"/>
+                                    </Grid>
+                                </Border>
+                                
+                                <!-- Action Buttons -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="actionButton" Command="{Binding RunNewTaskCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <PathIcon Width="14" Height="14" Foreground="#FFFFFF"
+                                                      Data="M20 14H14V20H10V14H4V10H10V4H14V10H20V14Z"/>
+                                            <TextBlock Text="Run new task"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Classes="actionButton" Command="{Binding EndTaskCommand}"
+                                            IsEnabled="{Binding SelectedProcess, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <PathIcon Width="14" Height="14" Foreground="#FFFFFF"
+                                                      Data="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+                                            <TextBlock Text="End task"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Process DataGrid -->
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding FilteredProcesses}"
+                                  SelectedItem="{Binding SelectedProcess}"
+                                  CanUserResizeColumns="True"
+                                  CanUserReorderColumns="True"
+                                  CanUserSortColumns="True"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200"/>
+                                <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="70"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90"/>
+                                <DataGridTextColumn Header="CPU" Binding="{Binding CpuFormatted}" Width="70"/>
+                                <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="100"/>
+                                <DataGridTextColumn Header="Disk (R)" Binding="{Binding DiskReadFormatted}" Width="100"/>
+                                <DataGridTextColumn Header="Disk (W)" Binding="{Binding DiskWriteFormatted}" Width="100"/>
+                                <DataGridTextColumn Header="Network" Binding="{Binding NetworkSendFormatted}" Width="100"/>
+                                <DataGridTextColumn Header="User" Binding="{Binding User}" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <!-- Tab 1: Performance -->
+                    <Grid ColumnDefinitions="240,*">
+                        <!-- Performance Navigation Sidebar -->
+                        <Border Grid.Column="0" Background="#1F1F1F" BorderBrush="#404040" BorderThickness="0,0,1,0">
+                            <ScrollViewer>
+                                <StackPanel Spacing="0">
+                                    <!-- CPU (compact button similar to Windows 11) -->
+                                    <Button Classes="perfNavButton" 
+                                            Classes.selected="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=0}"
+                                            Command="{Binding SelectPerformanceTabCommand}" CommandParameter="CPU">
+                                        <Grid Margin="8" ColumnDefinitions="80,*">
+                                            <!-- Mini Graph -->
+                                            <controls:PerformanceGraph Width="76" Height="40" Values="{Binding CpuHistory}" LineBrush="#60CDFF" FillBrush="#3360CDFF" ShowGrid="False"/>
+
+                                            <!-- Label + usage -->
+                                            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="CPU" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Text="{Binding SystemInfo.CpuUsage, StringFormat={}{0:F0}%}" Foreground="#60CDFF" FontSize="13" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="·" Foreground="#9E9E9E" FontSize="13"/>
+                                                    <TextBlock Text="{Binding SystemInfo.CpuSpeed, StringFormat={}{0:F2} GHz}" Foreground="#9E9E9E" FontSize="13"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- Memory (compact) -->
+                                    <Button Classes="perfNavButton"
+                                            Classes.selected="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=1}"
+                                            Command="{Binding SelectPerformanceTabCommand}" CommandParameter="Memory">
+                                        <Grid Margin="8" ColumnDefinitions="76,*">
+                                            <controls:PerformanceGraph Width="72" Height="40" Values="{Binding MemoryHistory}" LineBrush="#9B59B6" FillBrush="#339B59B6" ShowGrid="False"/>
+                                            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="Memory" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding SystemInfo.MemorySummaryFormatted}" 
+                                                           Foreground="#9E9E9E" FontSize="13"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- Disks (dynamic list) -->
+                                    <ItemsControl ItemsSource="{Binding Disks}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Classes="perfNavButton"
+                                                        Command="{Binding #ThisWindow.((vm:MainViewModel)DataContext).SelectDiskCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <Grid Margin="8" ColumnDefinitions="76,*">
+                                                        <controls:PerformanceGraph Width="72" Height="40" 
+                                                                                    Values="{Binding ActiveTimeHistory}" 
+                                                                                    LineBrush="#2ECC71" 
+                                                                                    FillBrush="#332ECC71" 
+                                                                                    ShowGrid="False"/>
+                                                        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                                <TextBlock Text="{Binding Type}" Foreground="#9E9E9E" FontSize="12"/>
+                                                                <TextBlock Text="·" Foreground="#9E9E9E" FontSize="12"/>
+                                                                <TextBlock Text="{Binding ActiveTimeFormatted}" Foreground="#9E9E9E" FontSize="12"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- Network Interfaces (dynamic list) -->
+                                    <ItemsControl ItemsSource="{Binding NetworkInterfaces}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Classes="perfNavButton"
+                                                        Command="{Binding #ThisWindow.((vm:MainViewModel)DataContext).SelectNetworkInterfaceCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <Grid Margin="8" ColumnDefinitions="76,*">
+                                                        <controls:PerformanceGraph Width="72" Height="40" 
+                                                                                    Values="{Binding ThroughputHistory}" 
+                                                                                    LineBrush="#E74C3C" 
+                                                                                    FillBrush="#33E74C3C" 
+                                                                                    ShowGrid="False"/>
+                                                        <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding DisplayName}" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                                <TextBlock Text="{Binding Name}" Foreground="#9E9E9E" FontSize="12"/>
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                <TextBlock Text="{Binding SidebarSendFormatted}" Foreground="#E74C3C" FontSize="11"/>
+                                                                <TextBlock Text="{Binding SidebarReceiveFormatted}" Foreground="#3498DB" FontSize="11"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- GPU (compact) -->
+                                    <Button Classes="perfNavButton"
+                                            Classes.selected="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=4}"
+                                            Command="{Binding SelectPerformanceTabCommand}" CommandParameter="GPU">
+                                        <Grid Margin="8" ColumnDefinitions="76,*">
+                                            <controls:PerformanceGraph Width="72" Height="40" Values="{Binding CpuHistory}" LineBrush="#F39C12" FillBrush="#33F39C12" ShowGrid="False"/>
+                                            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="GPU 0" Foreground="#FFFFFF" FontSize="13" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding SystemInfo.GpuUsage, StringFormat={}{0:F0}%}" Foreground="#9E9E9E" FontSize="13"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+
+                        <!-- Performance Details -->
+                        <Grid Grid.Column="1">
+                            <!-- CPU Details -->
+                            <views:CpuPerformanceView 
+                                  IsVisible="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=0}"/>
+
+                            <!-- Memory Details -->
+                            <views:MemoryPerformanceView
+                                  IsVisible="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=1}"/>
+
+                            <!-- Disk Details -->
+                            <views:DiskPerformanceView
+                                  IsVisible="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=2}"/>
+
+                            <!-- Network Details -->
+                            <views:NetworkPerformanceView
+                                  IsVisible="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=3}"/>
+
+                            <!-- GPU Details -->
+                            <views:GpuPerformanceView
+                                  IsVisible="{Binding SelectedPerformanceTab, Converter={StaticResource IntEqualsConverter}, ConverterParameter=4}"/>
+                        </Grid>
+                    </Grid>
+
+                    <!-- Tab 2: App History -->
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <PathIcon Width="64" Height="64" Foreground="#5A5A5A"
+                                      Data="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
+                            <TextBlock Text="App History" FontSize="24" Foreground="#9E9E9E" 
+                                       Margin="0,16,0,8" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Resource usage history will be shown here" 
+                                       Foreground="#5A5A5A" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Tab 3: Startup Apps -->
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <PathIcon Width="64" Height="64" Foreground="#5A5A5A"
+                                      Data="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z"/>
+                            <TextBlock Text="Startup Apps" FontSize="24" Foreground="#9E9E9E" 
+                                       Margin="0,16,0,8" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Startup applications will be shown here" 
+                                       Foreground="#5A5A5A" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Tab 4: Users -->
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <PathIcon Width="64" Height="64" Foreground="#5A5A5A"
+                                      Data="M16,13C15.71,13 15.38,13 15.03,13.05C16.19,13.89 17,15 17,16.5V19H23V16.5C23,14.17 18.33,13 16,13M8,13C5.67,13 1,14.17 1,16.5V19H15V16.5C15,14.17 10.33,13 8,13M8,11A3,3 0 0,0 11,8A3,3 0 0,0 8,5A3,3 0 0,0 5,8A3,3 0 0,0 8,11M16,11A3,3 0 0,0 19,8A3,3 0 0,0 16,5A3,3 0 0,0 13,8A3,3 0 0,0 16,11Z"/>
+                            <TextBlock Text="Users" FontSize="24" Foreground="#9E9E9E" 
+                                       Margin="0,16,0,8" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Active users will be shown here" 
+                                       Foreground="#5A5A5A" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Tab 5: Details -->
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Grid.Row="0" Background="#2D2D2D" Padding="16,8">
+                            <TextBlock Text="Details" FontSize="18" FontWeight="SemiBold" Foreground="#FFFFFF"/>
+                        </Border>
+                        <DataGrid Grid.Row="1" 
+                                  ItemsSource="{Binding FilteredProcesses}"
+                                  SelectedItem="{Binding SelectedProcess}"
+                                  CanUserResizeColumns="True"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="180"/>
+                                <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="70"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90"/>
+                                <DataGridTextColumn Header="User" Binding="{Binding User}" Width="100"/>
+                                <DataGridTextColumn Header="CPU" Binding="{Binding CpuFormatted}" Width="70"/>
+                                <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="100"/>
+                                <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70"/>
+                                <DataGridTextColumn Header="Command Line" Binding="{Binding CommandLine}" Width="300"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <!-- Tab 6: Services -->
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <PathIcon Width="64" Height="64" Foreground="#5A5A5A"
+                                      Data="M12,3C7.58,3 4,4.79 4,7V17C4,19.21 7.59,21 12,21C16.41,21 20,19.21 20,17V7C20,4.79 16.42,3 12,3M12,5C15.87,5 18,6.5 18,7C18,7.5 15.87,9 12,9C8.13,9 6,7.5 6,7C6,6.5 8.13,5 12,5M18,17C18,17.5 15.87,19 12,19C8.13,19 6,17.5 6,17V14.77C7.61,15.55 9.72,16 12,16C14.28,16 16.39,15.55 18,14.77V17M18,12C18,12.5 15.87,14 12,14C8.13,14 6,12.5 6,12V9.77C7.61,10.55 9.72,11 12,11C14.28,11 16.39,10.55 18,9.77V12Z"/>
+                            <TextBlock Text="Services" FontSize="24" Foreground="#9E9E9E" 
+                                       Margin="0,16,0,8" HorizontalAlignment="Center"/>
+                            <TextBlock Text="System services will be shown here" 
+                                       Foreground="#5A5A5A" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Carousel>
+
+                
+            </Grid>
+        </Grid>
+    </Grid>
+
+    <Window.Styles>
+        <!-- Window Button Styles -->
+        <Style Selector="Button.windowButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+        <Style Selector="Button.windowButton:pointerover">
+            <Setter Property="Background" Value="#3D3D3D"/>
+        </Style>
+        <Style Selector="Button.closeButton:pointerover">
+            <Setter Property="Background" Value="#C42B1C"/>
+        </Style>
+        <!-- DataGrid header style: make column headers slightly larger -->
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+    </Window.Styles>
+</Window>
