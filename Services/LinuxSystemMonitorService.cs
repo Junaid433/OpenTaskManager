@@ -802,6 +802,35 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                         }
                         disk.UsedSpace = totalUsed;
                         disk.FreeSpace = totalFree;
+
+                        // Determine if system disk
+                        disk.IsSystemDisk = false;
+                        foreach (var mount in mounts)
+                        {
+                            var mountParts = mount.Split(' ');
+                            if (mountParts.Length >= 2 && mountParts[0].Contains(disk.Name) && mountParts[1] == "/")
+                            {
+                                disk.IsSystemDisk = true;
+                                break;
+                            }
+                        }
+
+                        // Determine if page file (swap)
+                        disk.IsPageFile = false;
+                        try
+                        {
+                            var swaps = File.ReadAllLines("/proc/swaps");
+                            foreach (var swap in swaps.Skip(1))
+                            {
+                                var swapParts = swap.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                if (swapParts.Length >= 1 && swapParts[0].Contains(disk.Name))
+                                {
+                                    disk.IsPageFile = true;
+                                    break;
+                                }
+                            }
+                        }
+                        catch { }
                     }
                     catch { }
 

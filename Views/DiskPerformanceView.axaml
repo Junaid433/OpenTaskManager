@@ -10,7 +10,7 @@
 
     <Grid>
         <!-- Selected disk details -->
-        <Grid RowDefinitions="Auto,*,Auto,*,Auto" IsVisible="{Binding SelectedDisk, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <Grid RowDefinitions="Auto,*,Auto,*,Auto,Auto" IsVisible="{Binding SelectedDisk, Converter={x:Static ObjectConverters.IsNotNull}}">
             <!-- Header -->
             <Border Grid.Row="0" Background="#1F1F1F" Padding="18,12" BorderBrush="#2D2D2D" BorderThickness="0,0,0,1">
                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
@@ -101,22 +101,26 @@
 
                     <!-- Right stats -->
                     <Grid Grid.Column="1" Margin="16,0,0,0">
-                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Capacity:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedDisk.CapacityFormatted}" Foreground="#FFFFFF" FontSize="14"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Formatted:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedDisk.CapacityFormatted}" Foreground="#FFFFFF" FontSize="14"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="System disk:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Yes" Foreground="#FFFFFF" FontSize="14"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="System Disk:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedDisk.SystemDiskFormatted}" Foreground="#FFFFFF" FontSize="14"/>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Type:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedDisk.Type}" Foreground="#FFFFFF" FontSize="14"/>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Page file:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedDisk.PageFileFormatted}" Foreground="#FFFFFF" FontSize="14"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Type:" Foreground="#888888" FontSize="11" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedDisk.Type}" Foreground="#FFFFFF" FontSize="14"/>
                         </Grid>
                     </Grid>
                 </Grid>
             </Border>
+            <Border Grid.Row="5" Height="12" Background="#1F1F1F"/>
         </Grid>
 
         <!-- No disk selected placeholder -->

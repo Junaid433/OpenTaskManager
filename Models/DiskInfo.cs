@@ -50,6 +50,12 @@ public partial class DiskInfo : ObservableObject
     [ObservableProperty]
     private ObservableCollection<double> _transferRateHistory = [];  // Combined read+write
 
+    [ObservableProperty]
+    private bool _isSystemDisk;
+
+    [ObservableProperty]
+    private bool _isPageFile;
+
     // Formatted properties
     public string ReadSpeedFormatted => FormatBytesPerSecond(ReadSpeed);
     public string WriteSpeedFormatted => FormatBytesPerSecond(WriteSpeed);
@@ -59,6 +65,9 @@ public partial class DiskInfo : ObservableObject
     public string ActiveTimeFormatted => $"{ActiveTimePercent:F0}%";
     public string ResponseTimeFormatted => $"{AverageResponseTimeMs:F1} ms";
     public string TypeFormatted => Type;
+
+    public string SystemDiskFormatted => IsSystemDisk ? "Yes" : "No";
+    public string PageFileFormatted => IsPageFile ? "Yes" : "No";
 
     private static string FormatBytes(long bytes)
     {
@@ -91,4 +100,6 @@ public partial class DiskInfo : ObservableObject
     partial void OnCapacityChanged(long value) => OnPropertyChanged(nameof(CapacityFormatted));
     partial void OnActiveTimePercentChanged(double value) => OnPropertyChanged(nameof(ActiveTimeFormatted));
     partial void OnAverageResponseTimeMsChanged(double value) => OnPropertyChanged(nameof(ResponseTimeFormatted));
+    partial void OnIsSystemDiskChanged(bool value) => OnPropertyChanged(nameof(SystemDiskFormatted));
+    partial void OnIsPageFileChanged(bool value) => OnPropertyChanged(nameof(PageFileFormatted));
 }
