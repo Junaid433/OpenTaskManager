@@ -45,7 +45,7 @@
             </Grid>
 
             <!-- Disk Transfer Rate Label -->
-            <Border Grid.Row="3" Background="#1A1A1A" Padding="18,8">
+            <Border Grid.Row="3" Background="#1F1F1F" Padding="18,8">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Text="Disk transfer rate" FontSize="13" Foreground="#888888"/>
                     <TextBlock Grid.Column="1" Text="250 MB/s" FontSize="13" Foreground="#888888"/>
