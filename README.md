@@ -20,10 +20,9 @@ A modern Task Manager for Linux systems, inspired by the Windows 11 Task Manager
 
 ## Screenshots
 
-![Screenshot 1](Screenshots/Screenshot_20251203_161840.png)
+![Screenshot 1](Screenshots/Screenshot_20251203_162003.png)
 ![Screenshot 2](Screenshots/Screenshot_20251203_161924.png)
-![Screenshot 3](Screenshots/Screenshot_20251203_161947.png)
-![Screenshot 4](Screenshots/Screenshot_20251203_162003.png)
+![Screenshot 4](Screenshots/Screenshot_20251203_161840.png)
 
 ---
 
