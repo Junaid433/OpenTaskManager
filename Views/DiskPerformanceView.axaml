@@ -85,16 +85,20 @@
                             <StackPanel Grid.Row="0" Grid.Column="2"/>
 
                             <!-- Row 1: Read speed, Write speed -->
-                            <StackPanel Grid.Row="1" Grid.Column="0">
-                                <TextBlock Text="Read speed" Foreground="#888888" FontSize="11"/>
-                                <TextBlock Text="{Binding SelectedDisk.ReadSpeedFormatted}" 
-                                           Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="1" Grid.Column="1">
-                                <TextBlock Text="Write speed" Foreground="#888888" FontSize="11"/>
-                                <TextBlock Text="{Binding SelectedDisk.WriteSpeedFormatted}" 
-                                           Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
-                            </StackPanel>
+                            <Border Grid.Row="1" Grid.Column="0" BorderThickness="4,0,0,0" BorderBrush="#60CDFF" CornerRadius="2" Padding="8,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Read speed" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Text="{Binding SelectedDisk.ReadSpeedFormatted}" 
+                                               Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" BorderThickness="4,0,0,0" BorderBrush="#60CDFF" CornerRadius="2" Padding="8,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Write speed" Foreground="#888888" FontSize="11"/>
+                                    <TextBlock Text="{Binding SelectedDisk.WriteSpeedFormatted}" 
+                                               Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
+                                </StackPanel>
+                            </Border>
                             <StackPanel Grid.Row="1" Grid.Column="2"/>
                         </Grid>
                     </Grid>
