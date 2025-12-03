@@ -11,6 +11,7 @@ public interface ISystemMonitorService
     event EventHandler<List<ProcessInfo>>? ProcessesUpdated;
     event EventHandler<List<DiskInfo>>? DisksUpdated;
     event EventHandler<List<NetworkInterfaceInfo>>? NetworkInterfacesUpdated;
+    event EventHandler<List<UserInfo>>? UsersUpdated;
 
     Task StartMonitoringAsync();
     Task StopMonitoringAsync();
@@ -20,6 +21,7 @@ public interface ISystemMonitorService
     Task<List<CpuCoreInfo>> GetCpuCoresAsync();
     Task<List<DiskInfo>> GetDisksAsync();
     Task<List<NetworkInterfaceInfo>> GetNetworkInterfacesAsync();
+    Task<List<UserInfo>> GetUsersAsync();
     
     Task<bool> KillProcessAsync(int pid);
     Task<bool> SetProcessPriorityAsync(int pid, string priority);

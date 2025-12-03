@@ -81,6 +81,8 @@ public partial class NetworkInterfaceInfo : ObservableObject
 
     private static string FormatBitsPerSecond(long bits)
     {
+        if (bits < 0) bits = 0;
+        
         string[] sizes = ["bps", "Kbps", "Mbps", "Gbps"];
         int order = 0;
         double size = bits;

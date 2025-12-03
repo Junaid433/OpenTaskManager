@@ -76,6 +76,19 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private NetworkInterfaceInfo? _selectedNetworkInterface;
 
+    // Users collection
+    [ObservableProperty]
+    private ObservableCollection<UserInfo> _users = [];
+
+    [ObservableProperty]
+    private UserInfo? _selectedUser;
+
+    [ObservableProperty]
+    private ObservableCollection<UserInfo> _filteredUsers = [];
+
+    [ObservableProperty]
+    private string _userSearchText = string.Empty;
+
     [ObservableProperty]
     private string _sortColumn = "CPU";
 
@@ -91,6 +104,7 @@ public partial class MainViewModel : ObservableObject
         _monitorService.ProcessesUpdated += OnProcessesUpdated;
         _monitorService.DisksUpdated += OnDisksUpdated;
         _monitorService.NetworkInterfacesUpdated += OnNetworkInterfacesUpdated;
+        _monitorService.UsersUpdated += OnUsersUpdated;
 
         // Initialize history with zeros
         for (int i = 0; i < MaxHistoryPoints; i++)
@@ -222,13 +236,14 @@ public partial class MainViewModel : ObservableObject
 
                     // Update history - throughput as percentage of link speed or fixed max
                     var maxSpeed = existing.LinkSpeed > 0 ? existing.LinkSpeed / 8.0 : 125_000_000.0; // Default 1Gbps
-                    var throughputPercent = ((iface.SendSpeed + iface.ReceiveSpeed) / maxSpeed) * 100;
-                    AddToHistory(existing.ThroughputHistory, Math.Min(100, throughputPercent));
+                    var throughputBytes = iface.SendSpeed + iface.ReceiveSpeed;
+                    var throughputPercent = (throughputBytes / maxSpeed) * 100;
+                    AddToHistory(existing.ThroughputHistory, Math.Min(100, Math.Max(0, throughputPercent)));
                     
                     var sendPercent = (iface.SendSpeed / maxSpeed) * 100;
                     var recvPercent = (iface.ReceiveSpeed / maxSpeed) * 100;
-                    AddToHistory(existing.SendHistory, Math.Min(100, sendPercent));
-                    AddToHistory(existing.ReceiveHistory, Math.Min(100, recvPercent));
+                    AddToHistory(existing.SendHistory, Math.Min(100, Math.Max(0, sendPercent)));
+                    AddToHistory(existing.ReceiveHistory, Math.Min(100, Math.Max(0, recvPercent)));
                 }
                 else
                 {
@@ -253,6 +268,81 @@ public partial class MainViewModel : ObservableObject
             if (SelectedNetworkInterface == null && NetworkInterfaces.Count > 0)
                 SelectedNetworkInterface = NetworkInterfaces.FirstOrDefault(n => n.IsUp) ?? NetworkInterfaces[0];
         });
+    }
+
+    private void OnUsersUpdated(object? sender, List<UserInfo> userList)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            // Update existing users or add new ones
+            foreach (var user in userList)
+            {
+                var existing = Users.FirstOrDefault(u => u.UserName == user.UserName);
+                if (existing != null)
+                {
+                    // Update existing user stats
+                    existing.CpuUsage = user.CpuUsage;
+                    existing.MemoryBytes = user.MemoryBytes;
+                    existing.DiskReadBytes = user.DiskReadBytes;
+                    existing.DiskWriteBytes = user.DiskWriteBytes;
+                    existing.NetworkSendBytes = user.NetworkSendBytes;
+                    existing.NetworkReceiveBytes = user.NetworkReceiveBytes;
+                    existing.ProcessCount = user.ProcessCount;
+                    existing.Status = user.Status;
+
+                    // Update processes list if expanded
+                    if (existing.IsExpanded)
+                    {
+                        existing.Processes.Clear();
+                        foreach (var proc in user.Processes)
+                        {
+                            existing.Processes.Add(proc);
+                        }
+                    }
+                }
+                else
+                {
+                    Users.Add(user);
+                }
+            }
+
+            // Remove users that no longer exist
+            var userNames = userList.Select(u => u.UserName).ToHashSet();
+            var toRemove = Users.Where(u => !userNames.Contains(u.UserName)).ToList();
+            foreach (var user in toRemove)
+                Users.Remove(user);
+
+            // Select first user if none selected
+            if (SelectedUser == null && Users.Count > 0)
+                SelectedUser = Users[0];
+
+            // Refresh filtered view
+            ApplyUserFilter();
+        });
+    }
+
+    partial void OnUserSearchTextChanged(string value)
+    {
+        ApplyUserFilter();
+    }
+
+    private void ApplyUserFilter()
+    {
+        var query = string.IsNullOrWhiteSpace(UserSearchText)
+            ? Users
+            : new ObservableCollection<UserInfo>(Users.Where(u =>
+                (u.UserName != null && u.UserName.Contains(UserSearchText, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Status != null && u.Status.Contains(UserSearchText, StringComparison.OrdinalIgnoreCase))));
+
+        // Preserve selection if possible
+        var previouslySelectedUserName = SelectedUser?.UserName;
+
+        FilteredUsers = new ObservableCollection<UserInfo>(query);
+
+        if (previouslySelectedUserName != null)
+        {
+            SelectedUser = FilteredUsers.FirstOrDefault(u => u.UserName == previouslySelectedUserName) ?? SelectedUser;
+        }
     }
 
     private void AddToHistory(ObservableCollection<double> history, double value)
@@ -388,6 +478,72 @@ public partial class MainViewModel : ObservableObject
     {
         SelectedNetworkInterface = networkInterface;
         SelectedPerformanceTab = 3; // Switch to Network tab
+    }
+
+    [RelayCommand]
+    private void ToggleUserExpanded(UserInfo user)
+    {
+        user.IsExpanded = !user.IsExpanded;
+    }
+
+    [RelayCommand]
+    private async Task DisconnectUser()
+    {
+        if (SelectedUser == null) return;
+        
+        try
+        {
+            // On Linux, we can use pkill to terminate all user processes
+            // This is a simplified implementation - a real app would need proper confirmation dialogs
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "pkill",
+                Arguments = $"-u {SelectedUser.UserName}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using var process = System.Diagnostics.Process.Start(psi);
+            process?.WaitForExit();
+        }
+        catch
+        {
+            // Ignore errors
+        }
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task ManageUserAccounts()
+    {
+        try
+        {
+            // Open system settings for user accounts
+            // Try various common tools
+            var tools = new[]
+            {
+                ("gnome-control-center", "user-accounts"),
+                ("systemsettings5", "kcm_users"),
+                ("users-admin", ""),
+                ("kdesu", "kuser")
+            };
+
+            foreach (var (tool, args) in tools)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(tool, args);
+                    return;
+                }
+                catch { }
+            }
+        }
+        catch
+        {
+            // Ignore if no tool available
+        }
+        await Task.CompletedTask;
     }
 
     [RelayCommand]

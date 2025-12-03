@@ -111,3 +111,21 @@ public class LongGreaterThanZeroConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public class StringNotNullOrEmptyConverter : IValueConverter
+{
+    public static readonly StringNotNullOrEmptyConverter Instance = new();
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        bool result = value is string s && !string.IsNullOrWhiteSpace(s);
+        if (parameter is string p && p.Equals("Invert", StringComparison.OrdinalIgnoreCase))
+            result = !result;
+        return result;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

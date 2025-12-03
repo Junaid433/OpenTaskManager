@@ -8,6 +8,7 @@
         <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
         <converters:LongGreaterThanZeroConverter x:Key="LongGreaterThanZeroConverter"/>
         <converters:PercentToWidthConverter x:Key="PercentToWidthConverter"/>
+        <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter"/>
     </Application.Resources>
 
     <Application.Styles>

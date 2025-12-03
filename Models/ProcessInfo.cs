@@ -12,7 +12,7 @@ public partial class ProcessInfo : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
-    private string _status = "Running";
+    private string _status = "Unknown";
 
     [ObservableProperty]
     private double _cpuUsage;
@@ -52,6 +52,9 @@ public partial class ProcessInfo : ObservableObject
 
     [ObservableProperty]
     private bool _isSelected;
+
+    [ObservableProperty]
+    private string? _iconPath;
 
     public string MemoryFormatted => FormatBytes(MemoryBytes);
     public string DiskReadFormatted => FormatBytes(DiskReadBytes) + "/s";

@@ -17,6 +17,7 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
     public event EventHandler<List<ProcessInfo>>? ProcessesUpdated;
     public event EventHandler<List<DiskInfo>>? DisksUpdated;
     public event EventHandler<List<NetworkInterfaceInfo>>? NetworkInterfacesUpdated;
+    public event EventHandler<List<UserInfo>>? UsersUpdated;
 
     public int RefreshIntervalMs { get; set; } = 1000;
 
@@ -42,11 +43,13 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                     var processes = await GetProcessesAsync();
                     var disks = await GetDisksAsync();
                     var networks = await GetNetworkInterfacesAsync();
+                    var users = await GetUsersAsync(processes);
 
                     SystemInfoUpdated?.Invoke(this, systemInfo);
                     ProcessesUpdated?.Invoke(this, processes);
                     DisksUpdated?.Invoke(this, disks);
                     NetworkInterfacesUpdated?.Invoke(this, networks);
+                    UsersUpdated?.Invoke(this, users);
                 }
                 catch (Exception ex)
                 {
@@ -614,6 +617,49 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                     .Where(d => int.TryParse(Path.GetFileName(d), out _))
                     .ToList();
 
+                // Build a quick map of executable base name -> desktop icon name by scanning .desktop files
+                var desktopMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                try
+                {
+                    var desktopDirs = new[] { "/usr/share/applications", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications") };
+                    foreach (var ddir in desktopDirs)
+                    {
+                        if (!Directory.Exists(ddir)) continue;
+                        foreach (var desktopFile in Directory.GetFiles(ddir, "*.desktop"))
+                        {
+                            try
+                            {
+                                string exec = null;
+                                string icon = null;
+                                foreach (var line in File.ReadAllLines(desktopFile))
+                                {
+                                    if (line.StartsWith("Exec=") && exec == null)
+                                    {
+                                        exec = line.Substring(5).Trim();
+                                    }
+                                    else if (line.StartsWith("Icon=") && icon == null)
+                                    {
+                                        icon = line.Substring(5).Trim();
+                                    }
+                                    if (exec != null && icon != null) break;
+                                }
+                                if (!string.IsNullOrEmpty(exec) && !string.IsNullOrEmpty(icon))
+                                {
+                                    // Exec may contain args; take the program name
+                                    var first = exec.Split(' ')[0];
+                                    // remove placeholders like %U %f
+                                    first = first.Split('%')[0].Trim();
+                                    var baseName = Path.GetFileName(first);
+                                    if (!string.IsNullOrEmpty(baseName) && !desktopMap.ContainsKey(baseName))
+                                        desktopMap[baseName] = icon;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                catch { }
+
                 foreach (var procDir in procDirs)
                 {
                     try
@@ -629,17 +675,29 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                             process.Name = statusLines.FirstOrDefault(l => l.StartsWith("Name:"))?.Split(':').Last().Trim() ?? "Unknown";
                             process.ThreadCount = int.TryParse(statusLines.FirstOrDefault(l => l.StartsWith("Threads:"))?.Split(':').Last().Trim(), out var threads) ? threads : 0;
 
-                            var state = statusLines.FirstOrDefault(l => l.StartsWith("State:"))?.Split(':').Last().Trim().FirstOrDefault();
-                            process.Status = state switch
+                            var stateLine = statusLines.FirstOrDefault(l => l.StartsWith("State:"));
+                            if (stateLine != null)
                             {
-                                'R' => "Running",
-                                'S' => "Sleeping",
-                                'D' => "Disk sleep",
-                                'Z' => "Zombie",
-                                'T' => "Stopped",
-                                'I' => "Idle",
-                                _ => "Unknown"
-                            };
+                                // State line format: "State:  S (sleeping)"
+                                var stateParts = stateLine.Split(':').Last().Trim();
+                                var stateChar = stateParts.Length > 0 ? stateParts[0] : '?';
+                                
+                                process.Status = stateChar switch
+                                {
+                                    'R' => "Running",
+                                    'S' => "Sleeping",
+                                    'D' => "Disk sleep",
+                                    'Z' => "Zombie",
+                                    'T' => "Stopped",
+                                    'W' => "Paging",
+                                    'X' => "Dead",
+                                    'x' => "Dead",
+                                    'K' => "Wakekill",
+                                    'P' => "Parked",
+                                    'I' => "Idle",
+                                    _ => "Unknown"
+                                };
+                            }
 
                             var uid = statusLines.FirstOrDefault(l => l.StartsWith("Uid:"))?.Split('\t', StringSplitOptions.RemoveEmptyEntries).Skip(1).FirstOrDefault();
                             if (uid != null)
@@ -710,6 +768,65 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                         {
                             process.CommandLine = File.ReadAllText(cmdlinePath).Replace('\0', ' ').Trim();
                         }
+
+                        // Try to resolve an icon for the process using .desktop mapping and exe path
+                        try
+                        {
+                            // readlink to resolve the exe path
+                            string exePath = null;
+                            try
+                            {
+                                var psi = new ProcessStartInfo
+                                {
+                                    FileName = "readlink",
+                                    Arguments = $"-f {Path.Combine(procDir, "exe")}",
+                                    RedirectStandardOutput = true,
+                                    UseShellExecute = false,
+                                    CreateNoWindow = true
+                                };
+                                using var rproc = Process.Start(psi);
+                                if (rproc != null)
+                                {
+                                    exePath = rproc.StandardOutput.ReadToEnd().Trim();
+                                    rproc.WaitForExit(200);
+                                }
+                            }
+                            catch { exePath = null; }
+
+                            if (!string.IsNullOrEmpty(exePath))
+                            {
+                                var exeBase = Path.GetFileName(exePath);
+                                if (!string.IsNullOrEmpty(exeBase) && desktopMap.TryGetValue(exeBase, out var iconName))
+                                {
+                                    string resolved = null;
+                                    // If absolute path
+                                    if (Path.IsPathRooted(iconName) && File.Exists(iconName)) resolved = iconName;
+                                    else
+                                    {
+                                        // common locations
+                                        var pixmap = $"/usr/share/pixmaps/{iconName}.png";
+                                        if (File.Exists(pixmap)) resolved = pixmap;
+                                        else
+                                        {
+                                            // search icon themes under /usr/share/icons for matching name
+                                            try
+                                            {
+                                                var iconFiles = Directory.EnumerateFiles("/usr/share/icons", iconName + ".*", SearchOption.AllDirectories).FirstOrDefault();
+                                                if (iconFiles != null) resolved = iconFiles;
+                                            }
+                                            catch { }
+                                        }
+                                    }
+
+                                    if (!string.IsNullOrEmpty(resolved))
+                                    {
+                                        // Prefix with file:// for Avalonia Image
+                                        process.IconPath = resolved.StartsWith("file://") ? resolved : "file://" + resolved;
+                                    }
+                                }
+                            }
+                        }
+                        catch { }
 
                         // I/O stats
                         var ioPath = Path.Combine(procDir, "io");
@@ -1068,10 +1185,16 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                     if (_previousNetworkStats.TryGetValue(name, out var prev))
                     {
                         var elapsed = (DateTime.Now - prev.timestamp).TotalSeconds;
-                        if (elapsed > 0)
+                        if (elapsed > 0.1) // Ensure minimum elapsed time to avoid division issues
                         {
-                            iface.ReceiveSpeed = (long)((iface.TotalBytesReceived - prev.rx) / elapsed);
-                            iface.SendSpeed = (long)((iface.TotalBytesSent - prev.tx) / elapsed);
+                            var recvDelta = iface.TotalBytesReceived - prev.rx;
+                            var sendDelta = iface.TotalBytesSent - prev.tx;
+                            
+                            // Only update if deltas are non-negative (shouldn't go backwards)
+                            if (recvDelta >= 0)
+                                iface.ReceiveSpeed = (long)(recvDelta / elapsed);
+                            if (sendDelta >= 0)
+                                iface.SendSpeed = (long)(sendDelta / elapsed);
                         }
                     }
 
@@ -1160,6 +1283,111 @@ public class LinuxSystemMonitorService : ISystemMonitorService, IDisposable
                 _ => 3
             })
             .ToList();
+    }
+
+    public Task<List<UserInfo>> GetUsersAsync()
+    {
+        return GetUsersAsync([]);
+    }
+
+    private async Task<List<UserInfo>> GetUsersAsync(List<ProcessInfo> processes)
+    {
+        var users = new List<UserInfo>();
+
+        await Task.Run(() =>
+        {
+            try
+            {
+                // Get logged-in users from 'who' command or /var/run/utmp
+                var loggedInUsers = new HashSet<string>();
+                
+                try
+                {
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = "who",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    using var proc = Process.Start(psi);
+                    if (proc != null)
+                    {
+                        var output = proc.StandardOutput.ReadToEnd();
+                        proc.WaitForExit(1000);
+
+                        foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length > 0)
+                            {
+                                loggedInUsers.Add(parts[0]);
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                // If no logged-in users found, get unique users from processes
+                if (loggedInUsers.Count == 0)
+                {
+                    foreach (var process in processes)
+                    {
+                        if (!string.IsNullOrEmpty(process.User))
+                        {
+                            loggedInUsers.Add(process.User);
+                        }
+                    }
+                }
+
+                // Group processes by user
+                var processesByUser = processes
+                    .Where(p => !string.IsNullOrEmpty(p.User))
+                    .GroupBy(p => p.User)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                int sessionId = 1;
+                foreach (var userName in loggedInUsers.OrderBy(u => u))
+                {
+                    var userInfo = new UserInfo
+                    {
+                        UserName = userName,
+                        DisplayName = userName,
+                        SessionId = sessionId++,
+                        Status = "Active"
+                    };
+
+                    // Get processes for this user
+                    if (processesByUser.TryGetValue(userName, out var userProcesses))
+                    {
+                        userInfo.ProcessCount = userProcesses.Count;
+                        userInfo.CpuUsage = userProcesses.Sum(p => p.CpuUsage);
+                        userInfo.MemoryBytes = userProcesses.Sum(p => p.MemoryBytes);
+                        userInfo.DiskReadBytes = userProcesses.Sum(p => p.DiskReadBytes);
+                        userInfo.DiskWriteBytes = userProcesses.Sum(p => p.DiskWriteBytes);
+                        userInfo.NetworkSendBytes = userProcesses.Sum(p => p.NetworkSendBytes);
+                        userInfo.NetworkReceiveBytes = userProcesses.Sum(p => p.NetworkReceiveBytes);
+
+                        // Add top processes (sorted by CPU usage)
+                        var topProcesses = userProcesses
+                            .OrderByDescending(p => p.CpuUsage)
+                            .Take(50)
+                            .ToList();
+
+                        foreach (var proc in topProcesses)
+                        {
+                            userInfo.Processes.Add(proc);
+                        }
+                    }
+
+                    users.Add(userInfo);
+                }
+            }
+            catch { }
+        });
+
+        return users.OrderByDescending(u => u.CpuUsage).ToList();
     }
 
     public async Task<bool> KillProcessAsync(int pid)
