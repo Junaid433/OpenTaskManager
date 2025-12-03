@@ -54,7 +54,7 @@
                 <!-- Column 1 -->
                 <StackPanel Grid.Column="0">
                     <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="In use (Compressed)" Foreground="#FFFFFF" FontSize="11"/>
+                        <TextBlock Text="In use (Compressed)" Foreground="#9E9E9E" FontSize="11"/>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" Text="{Binding SystemInfo.UsedMemoryFormatted}" />
                             <TextBlock Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" Margin="6,0,0,0" IsVisible="{Binding SystemInfo.Compressed, Converter={StaticResource LongGreaterThanZeroConverter}}">

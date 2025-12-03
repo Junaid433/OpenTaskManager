@@ -103,8 +103,6 @@ public partial class MainViewModel : ObservableObject
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            // Debug to console for verification
-            try { Console.WriteLine($"SystemInfo updated: CPU {info.CpuUsage:F1}%, Speed {info.CpuSpeed:F2} GHz, Processes {info.ProcessCount}, Threads {info.ThreadCount}, Handles {info.HandleCount}, L1 {info.L1CacheFormatted}, L2 {info.L2CacheFormatted}, L3 {info.L3CacheFormatted}"); } catch {}
             SystemInfo = info;
 
             // Update histories
