@@ -41,7 +41,7 @@
         </Grid>
 
         <!-- Secondary graphs: Video Encode and Video Decode -->
-        <Border Grid.Row="3" Background="#1F1F1F" Padding="12,8" BorderBrush="#2D2D2D" BorderThickness="0,1,0,0">
+        <Border Grid.Row="3" Background="#1F1F1F" Padding="12,8">
             <Grid ColumnDefinitions="*,16,*">
                 <!-- Video Encode Graph -->
                 <StackPanel Grid.Column="0">
