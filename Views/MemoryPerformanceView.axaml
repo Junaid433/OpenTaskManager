@@ -42,15 +42,14 @@
                     <controls:MemoryComposition TotalBytes="{Binding SystemInfo.TotalMemory}" 
                                                  UsedBytes="{Binding SystemInfo.UsedMemory}" 
                                                  CompressedBytes="{Binding SystemInfo.Compressed}" 
-                                                 HardwareReservedBytes="{Binding SystemInfo.HardwareReserved}" 
                                                  Height="36" HorizontalAlignment="Stretch"/>
                 </Border>
             </StackPanel>
         </Border>
 
-        <!-- Three Column System: Column 1 (In use, Committed, Paged pool), Column 2 (Available, Cached, Non-paged pool), Column 3 (Hardware reserved) -->
+        <!-- Two Column System: Column 1 (In use, Committed, Paged pool), Column 2 (Available, Cached, Non-paged pool) -->
         <Border Grid.Row="3" Background="#1F1F1F" Padding="16,8,16,8">
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="48">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="48">
                 <!-- Column 1 -->
                 <StackPanel Grid.Column="0">
                     <StackPanel Margin="0,0,0,16">
@@ -96,13 +95,6 @@
                         <TextBlock Text="{Binding SystemInfo.PageTablesFormatted}"
                                    Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
                     </StackPanel>
-                </StackPanel>
-
-                <!-- Column 3 -->
-                <StackPanel Grid.Column="2" VerticalAlignment="Top">
-                    <TextBlock Text="Hardware reserved" Foreground="#9E9E9E" FontSize="11"/>
-                    <TextBlock Text="{Binding SystemInfo.HardwareReservedFormatted}"
-                               Foreground="#FFFFFF" FontSize="18" FontWeight="Normal"/>
                 </StackPanel>
             </Grid>
         </Border>

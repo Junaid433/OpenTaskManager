@@ -13,9 +13,6 @@ public class MemoryComposition : Control
     public static readonly StyledProperty<long> UsedBytesProperty =
         AvaloniaProperty.Register<MemoryComposition, long>(nameof(UsedBytes));
 
-    public static readonly StyledProperty<long> HardwareReservedBytesProperty =
-        AvaloniaProperty.Register<MemoryComposition, long>(nameof(HardwareReservedBytes));
-
     public static readonly StyledProperty<long> CompressedBytesProperty =
         AvaloniaProperty.Register<MemoryComposition, long>(nameof(CompressedBytes));
 
@@ -35,12 +32,6 @@ public class MemoryComposition : Control
     {
         get => GetValue(UsedBytesProperty);
         set => SetValue(UsedBytesProperty, value);
-    }
-
-    public long HardwareReservedBytes
-    {
-        get => GetValue(HardwareReservedBytesProperty);
-        set => SetValue(HardwareReservedBytesProperty, value);
     }
 
     public long CompressedBytes
@@ -63,7 +54,7 @@ public class MemoryComposition : Control
 
     static MemoryComposition()
     {
-        AffectsRender<MemoryComposition>(TotalBytesProperty, UsedBytesProperty, HardwareReservedBytesProperty, CompressedBytesProperty, FillBrushProperty, ReservedBrushProperty);
+        AffectsRender<MemoryComposition>(TotalBytesProperty, UsedBytesProperty, CompressedBytesProperty, FillBrushProperty, ReservedBrushProperty);
     }
 
     public MemoryComposition()
@@ -84,22 +75,11 @@ public class MemoryComposition : Control
 
         double usedPct = Math.Max(0, Math.Min(1.0, (double)UsedBytes / TotalBytes));
         double compressedPct = TotalBytes > 0 ? Math.Max(0, Math.Min(usedPct, (double)CompressedBytes / TotalBytes)) : 0;
-        double reservedPct = TotalBytes > 0 ? Math.Max(0, Math.Min(1.0, (double)HardwareReservedBytes / TotalBytes)) : 0;
 
         // In use area - use FillBrush if provided otherwise fallback to blue
         var usedBrush = FillBrush as SolidColorBrush ?? new SolidColorBrush(Color.Parse("#60CDFF"));
         var usedRect = new Rect(0, 0, bounds.Width * usedPct, bounds.Height);
         context.DrawRectangle(usedBrush, null, usedRect);
-
-        // Hardware reserved block at far right
-        if (reservedPct > 0)
-        {
-            var reservedWidth = Math.Max(4, bounds.Width * reservedPct);
-            var reservedX = bounds.Width - reservedWidth;
-            var reservedRect = new Rect(reservedX, 0, reservedWidth, bounds.Height);
-            var reserveBrush = ReservedBrush as SolidColorBrush ?? new SolidColorBrush(Color.Parse("#3A3A3A"));
-            context.DrawRectangle(reserveBrush, null, reservedRect);
-        }
 
         // "In use" label bubble
         if (usedRect.Width > 50)
