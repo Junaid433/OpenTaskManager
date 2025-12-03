@@ -41,7 +41,7 @@
         </Grid>
 
         <!-- Memory composition bar -->
-        <Border Grid.Row="3" Background="#1F1F1F" Padding="0" BorderBrush="#333333" BorderThickness="0,1,0,0">
+        <Border Grid.Row="3" Background="#1F1F1F" Padding="0">
             <StackPanel Margin="12,8,12,16">
                 <TextBlock Text="Memory composition" Foreground="#9E9E9E" FontSize="11"/>
                 <Border BorderBrush="#333333" BorderThickness="1" Margin="0,8,0,0" HorizontalAlignment="Stretch">
