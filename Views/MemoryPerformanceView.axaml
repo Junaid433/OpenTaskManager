@@ -63,7 +63,7 @@
                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,6">
                             <TextBlock Text="In Use (Compressed)" Foreground="#888888" FontSize="11"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding SystemInfo.UsedMemoryFormatted}" Foreground="#FFFFFF" FontSize="22" FontWeight="Normal" LineHeight="24"/>
+                                <TextBlock Text="{Binding SystemInfo.UsedMemoryFormatted}" Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" LineHeight="24"/>
                                 <TextBlock Foreground="#FFFFFF" FontSize="18" FontWeight="Normal" Margin="6,0,0,0" IsVisible="{Binding SystemInfo.Compressed, Converter={StaticResource LongGreaterThanZeroConverter}}">
                                     <Run Text=" ("/>
                                     <Run Text="{Binding SystemInfo.CompressedMemoryFormatted}"/>
